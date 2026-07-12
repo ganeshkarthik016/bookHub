@@ -2,7 +2,8 @@ import express from 'express'
 import cookieParser from "cookie-parser"
 import dotenv from "dotenv"
 import cors from "cors"
-import userRouter from "./routes/user.routes.js";
+import router from "./routes/user.routes.js";
+const app = express();
 
 app.use(cors({
     origin: process.env.CORS_ORIGIN,
@@ -20,4 +21,5 @@ import userRouter from './routes/user.routes.js'
 app.use("/api/v1/users", userRouter)
 
 
-const app = express();
+
+export { app }
