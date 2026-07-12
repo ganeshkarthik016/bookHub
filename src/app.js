@@ -2,7 +2,7 @@ import express from 'express'
 import cookieParser from "cookie-parser"
 import dotenv from "dotenv"
 import cors from "cors"
-
+import userRouter from "./routes/user.routes.js";
 
 app.use(cors({
     origin: process.env.CORS_ORIGIN,

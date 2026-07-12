@@ -1,48 +1,66 @@
-import { asyncHandler } from "../utils/asyncHandler.js"
-import { ApiError } from "../utils/ApiError.js"
-import { User } from "../models/user.model.js"
-import { ApiResponse } from "../utils/ApiResponse.js"
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { ApiError } from "../utils/ApiError.js";
+import { User } from "../models/user.model.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 
-const registerUser = asyncHandler(async (req, res, next) => {
+const registerUser = asyncHandler(async (req, res) => {
 
-    const { fullName, email, userName, password } = req.body
-    if (fullName === "" || email === "" || userName === "" || password === "") {
-        throw new ApiError(402, "All fields are required")
+    const { userFullName, email, userName, password, bio } = req.body;
+    if (
+        [userFullName, email, userName, password].some(
+            (field) => !field || field.trim() === ""
+        )
+    ) {
+        throw new ApiError(400, "All required fields are required");
     }
+
+    // Check if email already exists
     let existedUser = await User.findOne({
-        $or: [{ email }]
-    })
+        email: email.trim().toLowerCase(),
+    });
 
     if (existedUser) {
-        throw new ApiError(409, "email already exist")
+        throw new ApiError(409, "Email already exists");
     }
+
+    // Check if username already exists
     existedUser = await User.findOne({
-        $or: [{ userName }]
-    })
+        userName: userName.trim().toLowerCase(),
+    });
+
     if (existedUser) {
-        throw new ApiError(409, "username already exist")
+        throw new ApiError(409, "Username already exists");
     }
 
-
+    // Create user
     const user = await User.create({
-        fullName,
-        userName: userName.toLowerCase(),
-        email,
-        password
-    })
+        userFullName: userFullName.trim(),
+        userName: userName.trim().toLowerCase(),
+        email: email.trim().toLowerCase(),
+        password,
+        bio,
+    });
 
-    //checking if user is registered successfully
+    // Check whether user was created successfully
     const createdUser = await User.findById(user._id).select(
         "-password -refreshToken"
-    )
+    );
 
     if (!createdUser) {
-        throw new ApiError(500, "something went wrong while registering user")
+        throw new ApiError(
+            500,
+            "Something went wrong while registering the user"
+        );
     }
 
-    //return response
+    // Return success response
     return res.status(201).json(
-        new ApiResponse(200, "registered successfully")
-    )
-})
-export { registerUser }
+        new ApiResponse(
+            201,
+            createdUser,
+            "User registered successfully"
+        )
+    );
+});
+
+export { registerUser };
