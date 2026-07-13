@@ -2,6 +2,9 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { apiError } from "../utils/apiError.js";
 import { User } from "../models/user.model.js";
 import { apiResponse } from "../utils/apiResponse.js";
+import jwt from "jsonwebtoken";
+import { REFRESH_TOKEN_SECRET } from "../constants.js";
+
 const registerUser = asyncHandler(async (req, res) => {
     const { userFullName, email, userName, password, bio } = req.body;
     if (
@@ -129,10 +132,54 @@ const logoutUser = asyncHandler(async (req, res) => {
         );
 })
 
+const refreshAccessToken = asyncHandler(async (req, res) => {
+    try {
+        const incomingrefreshToken = req.cookie.refreshAToken || req.body.refreshAToken
+        if (!incomingrefreshToken) {
+            throw new apiError(401, "Unauthorized access")
+        }
+        const decodedToken = jwt.verify(incomingrefreshToken, REFRESH_TOKEN_SECRET);
+        if (!decodedToken) {
+            throw new apiError(401, "Unauthorized access")
+        }
+        const user = await User.findById(decodedToken.id);
+        if (!user) {
+            throw new apiError(404, "User not found, unauthorized access. Invalid refresh token")
+        }
+        if (incomingrefreshToken !== user.refreshToken) {
+            throw new apiError(401, "Unauthorized access , invalid refresh token")
+
+        }
+        const options = {
+            httpOnly: true,
+            secure: true
+        }
+        new_accessToken = await user.generateAccessToken();
+        new_refreshToken = await user.generateRefreshToken();
+        return res.status(200)
+            .cookie("refreshToken", new_refreshToken, options)
+            .cookie("accessToken", new_accessToken, options)
+            .json(
+                new apiResponse(
+                    200, {
+                    accessToken: new_accessToken, refreshToken: new_refreshToken
+                },
+                    "Access token refreshed successfully"
+                )
+            )
+    } catch (error) {
+        new apiError(401, eror?.message || "Somthing went wrong while refreshing the access token")
+    }
+
+
+})
+
 
 
 export {
     registerUser
     , loginUser
     , logoutUser
+    , refreshAccessToken
+
 };
