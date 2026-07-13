@@ -134,7 +134,7 @@ const logoutUser = asyncHandler(async (req, res) => {
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
     try {
-        const incomingrefreshToken = req.cookie.refreshAToken || req.body.refreshAToken
+        const incomingrefreshToken = req.cookies.refreshToken || req.body.refreshToken
         if (!incomingrefreshToken) {
             throw new apiError(401, "Unauthorized access")
         }
@@ -142,7 +142,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
         if (!decodedToken) {
             throw new apiError(401, "Unauthorized access")
         }
-        const user = await User.findById(decodedToken.id);
+        const user = await User.findById(decodedToken._id);
         if (!user) {
             throw new apiError(404, "User not found, unauthorized access. Invalid refresh token")
         }
@@ -154,8 +154,8 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
             httpOnly: true,
             secure: true
         }
-        new_accessToken = await user.generateAccessToken();
-        new_refreshToken = await user.generateRefreshToken();
+        const new_accessToken = await user.generateAccessToken();
+        const new_refreshToken = await user.generateRefreshToken();
         return res.status(200)
             .cookie("refreshToken", new_refreshToken, options)
             .cookie("accessToken", new_accessToken, options)
@@ -167,8 +167,8 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
                     "Access token refreshed successfully"
                 )
             )
-    } catch (error) {
-        new apiError(401, eror?.message || "Somthing went wrong while refreshing the access token")
+    } catch (Error) {
+        throw new apiError(401, Error?.message || "Somthing went wrong while refreshing the access token")
     }
 
 
