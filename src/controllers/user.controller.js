@@ -68,4 +68,76 @@ const registerUser = asyncHandler(async (req, res) => {
     );
 });
 
-export { registerUser };
+const loginUser = asyncHandler(async (req, res) => {
+    const { userName, email, password } = req.body;
+    if (!userName && !email) {
+        throw new apiError(400, "Username or email is required")
+    }
+    if (!password) {
+        throw new apiError(400, "Password is required")
+    }
+    const user = await User.findOne({
+        $or: [
+            { userName: userName.trim().toLowerCase() },
+            { email: email.trim().toLowerCase() },
+        ],
+    })
+    if (!user) {
+        throw new apiError(404, "User not found")
+    }
+    const isPasswordCorrect = await user.isPasswordCorrect(password);
+    if (!isPasswordCorrect) {
+        throw new apiError(401, "Invalid credentials")
+    }
+    const accessToken = user.generateAccessToken();
+    const refreshToken = user.generateRefreshToken();
+    user.refreshToken = refreshToken;
+    await user.save({ validateBeforeSave: false });
+
+    const loggedUser = await User.findById(user._id).select(
+        "-password -refreshToken"
+    )
+    const options = {
+        httpOnly: true,
+        secure: true
+    }
+    return res.status(200)
+        .cookie("refreshToken", refreshToken, options)
+        .cookie("accessToken", accessToken, options)
+        .json(
+            new apiResponse(
+                200, {
+                user:
+                    loggedUser, accessToken: accessToken, refreshToken: refreshToken
+            },
+                "User logged in successfully"
+            )
+        )
+
+
+})
+const logoutUser = asyncHandler(async (req, res) => {
+    await User.findByIdAndUpdate(req.user._id, { $set: { refreshToken: undefined } }, { new: true });
+    const options = {
+        httpOnly: true,
+        secure: true
+    }
+    return res.status(200)
+        .clearCookie("refreshToken", options)
+        .clearCookie("accessToken", options)
+        .json(
+            new apiResponse(
+                200,
+                { message: "User logged out successfully" },
+                "User logged out successfully"
+            )
+        );
+})
+
+
+
+export {
+    registerUser
+    , loginUser
+    , logoutUser
+};
