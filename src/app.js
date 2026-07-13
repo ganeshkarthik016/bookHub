@@ -19,6 +19,13 @@ app.use(cookieParser())
 import userRouter from './routes/user.routes.js'
 
 app.use("/api/v1/users", userRouter)
+app.use((err, req, res, next) => {
+    res.status(err.statusCode || 500).json({
+        success: false,
+        message: err.message,
+        errors: err.errors || [],
+    });
+});
 
 
 

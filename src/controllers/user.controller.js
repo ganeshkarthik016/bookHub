@@ -1,7 +1,7 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { apiError } from "../utils/apiError.js";
 import { User } from "../models/user.model.js";
-import { ApiResponse } from "../utils/apiResponse.js";
+import { apiResponse } from "../utils/apiResponse.js";
 
 const registerUser = asyncHandler(async (req, res) => {
 
@@ -11,7 +11,7 @@ const registerUser = asyncHandler(async (req, res) => {
             (field) => !field || field.trim() === ""
         )
     ) {
-        throw new ApiError(400, "All required fields are required");
+        throw new apiError(400, "All required fields are required");
     }
 
     // Check if email already exists
@@ -20,7 +20,7 @@ const registerUser = asyncHandler(async (req, res) => {
     });
 
     if (existedUser) {
-        throw new ApiError(409, "Email already exists");
+        throw new apiError(409, "Email already exists");
     }
 
     // Check if username already exists
@@ -29,7 +29,7 @@ const registerUser = asyncHandler(async (req, res) => {
     });
 
     if (existedUser) {
-        throw new ApiError(409, "Username already exists");
+        throw new apiError(409, "Username already exists");
     }
 
     // Create user
@@ -47,7 +47,7 @@ const registerUser = asyncHandler(async (req, res) => {
     );
 
     if (!createdUser) {
-        throw new ApiError(
+        throw new apiError(
             500,
             "Something went wrong while registering the user"
         );
@@ -55,7 +55,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
     // Return success response
     return res.status(201).json(
-        new ApiResponse(
+        new apiResponse(
             201,
             createdUser,
             "User registered successfully"
