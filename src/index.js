@@ -6,11 +6,12 @@ import { PORT } from "./constants.js";
 dotenv.config({
     path: './.env'
 })
+const port = PORT || 3000;
 
 connectDB()
     .then(() => {
-        app.listen({ PORT } || 3000, () => {
-            console.log(`⚙️ Server is running at port : ${process.env.PORT}`);
+        app.listen(port, () => {
+            console.log(`⚙️ Server is running at port : ${port}`);
         })
     })
     .catch((err) => {

@@ -39,7 +39,7 @@ const userSchema = new mongoose.Schema(
             type: String,
             required: true,
             minlength: 8,
-            maxlength: 64,
+            maxlength: 64
         },
 
         bio: {
@@ -70,13 +70,12 @@ const userSchema = new mongoose.Schema(
 );
 
 // Hash password before saving
-userSchema.pre("save", async function (next) {
+userSchema.pre("save", async function () {
     if (!this.isModified("password")) {
-        return next();
+        return;
     }
 
     this.password = await bcrypt.hash(this.password, 10);
-    next();
 });
 
 // Compare entered password with hashed password

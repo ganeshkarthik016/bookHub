@@ -2,9 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { apiError } from "../utils/apiError.js";
 import { User } from "../models/user.model.js";
 import { apiResponse } from "../utils/apiResponse.js";
-
 const registerUser = asyncHandler(async (req, res) => {
-
     const { userFullName, email, userName, password, bio } = req.body;
     if (
         [userFullName, email, userName, password].some(
@@ -13,7 +11,6 @@ const registerUser = asyncHandler(async (req, res) => {
     ) {
         throw new apiError(400, "All required fields are required");
     }
-
     // Check if email already exists
     let existedUser = await User.findOne({
         email: email.trim().toLowerCase(),
@@ -22,7 +19,6 @@ const registerUser = asyncHandler(async (req, res) => {
     if (existedUser) {
         throw new apiError(409, "Email already exists");
     }
-
     // Check if username already exists
     existedUser = await User.findOne({
         userName: userName.trim().toLowerCase(),
@@ -36,10 +32,8 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new apiError(400, "Password must be between 8 and 64 characters");
     }
 
-
-    // Create user
     const user = await User.create({
-        userFullName: userFullName.trim(),
+        userFullName: userFullName.trim().toUpperCase(),
         userName: userName.trim().toLowerCase(),
         email: email.trim().toLowerCase(),
         password,
@@ -57,7 +51,6 @@ const registerUser = asyncHandler(async (req, res) => {
             "Something went wrong while registering the user"
         );
     }
-
     // Return success response
     return res.status(201).json(
         new apiResponse(
@@ -70,6 +63,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
 const loginUser = asyncHandler(async (req, res) => {
     const { userName, email, password } = req.body;
+
     if (!userName && !email) {
         throw new apiError(400, "Username or email is required")
     }
@@ -78,8 +72,8 @@ const loginUser = asyncHandler(async (req, res) => {
     }
     const user = await User.findOne({
         $or: [
-            { userName: userName.trim().toLowerCase() },
-            { email: email.trim().toLowerCase() },
+            { userName: userName?.trim().toLowerCase() },
+            { email: email?.trim().toLowerCase() },
         ],
     })
     if (!user) {
@@ -122,6 +116,7 @@ const logoutUser = asyncHandler(async (req, res) => {
         httpOnly: true,
         secure: true
     }
+    console.log(req.user.userName);
     return res.status(200)
         .clearCookie("refreshToken", options)
         .clearCookie("accessToken", options)
