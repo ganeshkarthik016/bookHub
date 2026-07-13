@@ -1,4 +1,7 @@
 import mongoose from "mongoose";
+import bcrypt from "bcrypt";
+import { JsonWebTokenError } from "jsonwebtoken";
+import { ACCESS_TOKEN_SECRET, ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_SECRET, REFRESH_TOKEN_EXPIRY } from "../constants";
 
 const userSchema = new mongoose.Schema(
     {
@@ -65,5 +68,10 @@ userSchema.pre("save", async function (next) {
 
 
 })
+userSchema.methods.isPasswordCorrect = async function (password) {
+    return await bcrypt.compare(password, this.password)
+}
+
+
 
 export const User = mongoose.model("User", userSchema);
