@@ -31,6 +31,11 @@ const registerUser = asyncHandler(async (req, res) => {
     if (existedUser) {
         throw new apiError(409, "Username already exists");
     }
+    const len = password.length;
+    if (len < 8 || len > 64) {
+        throw new apiError(400, "Password must be between 8 and 64 characters");
+    }
+
 
     // Create user
     const user = await User.create({
