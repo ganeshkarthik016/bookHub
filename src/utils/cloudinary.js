@@ -25,11 +25,14 @@ const uploadOnCloudinary = async (
             resource_type: "auto",
             folder,
         });
+        // console.log("Path:", localFilePath);
+        // console.log("Exists before delete:", fs.existsSync(localFilePath));
 
         if (fs.existsSync(localFilePath)) {
             fs.unlinkSync(localFilePath);
+            // console.log("Deleted");
         }
-
+        // console.log("Exists after delete:", fs.existsSync(localFilePath));
         return response;
     } catch (error) {
         if (localFilePath && fs.existsSync(localFilePath)) {

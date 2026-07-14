@@ -1,3 +1,8 @@
+import { apiError } from "./utils/apiError.js";
+import dotenv from "dotenv";
+
+dotenv.config();
+
 export const DB_NAME = process.env.DB_NAME || "notesdb";
 export const PORT = Number(process.env.PORT) || 8000;
 export const MONGODB_URI =
@@ -16,7 +21,7 @@ const requiredEnv = [
 
 for (const key of requiredEnv) {
     if (!process.env[key]) {
-        throw new Error(`Missing required environment variable: ${key}`);
+        throw new apiError(400, "message : Missing required environment variabe: " + key);
     }
 }
 

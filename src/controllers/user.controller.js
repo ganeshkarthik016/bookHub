@@ -271,15 +271,15 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
 })
 
 const updateProfilePic = asyncHandler(async (req, res) => {
-    const profilePicPath = req.files.path;
+    const profilePicPath = req.file.path;
     if (!profilePicPath) {
         throw new apiError(400, "Profile picture is required")
     }
     const uploaded = await uploadOnCloudinary(profilePicPath);
-    if (!uploaded.url) {
+    if (!uploaded.secure_url) {
         throw new apiError(500, "Failed to upload profile picture")
     }
-    const user = await User.findByIdAndUpdate(req.user?._id, { $set: { profilePic: uploaded.url } }, { new: true })
+    const user = await User.findByIdAndUpdate(req.user?._id, { $set: { profilePic: uploaded.secure_url } }, { new: true })
         .select("-password -refreshToken");
     if (!user) {
         throw new apiError(404, "User not found")

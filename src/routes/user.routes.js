@@ -11,12 +11,13 @@ import {
     deleteUser,
 } from "../controllers/user.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { uploadImage } from "../middlewares/multer.middleware.js";
 
 
 const router = Router();
 
 router.route("/register").post(
-    upload.fields([
+    uploadImage.fields([
         {
             name: "profilePic",
             maxCount: 1,
@@ -31,7 +32,7 @@ router.route("/logout").post(verifyJWT, logoutUser);
 router.route("/refresh-token").post(refreshAccessToken);
 router.route("/change-password").post(verifyJWT, changePassword);
 router.route("/update-account-details").post(verifyJWT, updateAccountDetails);
-router.route("/update-profile-pic").post(verifyJWT, upload.single("profilePic"), updateProfilePic);
+router.route("/update-profile-pic").post(verifyJWT, uploadImage.single("profilePic"), updateProfilePic);
 
 //get
 router.route("/get-current-user").get(verifyJWT, getCurrentUser);
