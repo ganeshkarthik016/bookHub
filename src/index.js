@@ -6,7 +6,7 @@ import { PORT } from "./constants.js";
 dotenv.config({
     path: './.env'
 })
-const port = PORT || 3000;
+const port = PORT;
 
 connectDB()
     .then(() => {
