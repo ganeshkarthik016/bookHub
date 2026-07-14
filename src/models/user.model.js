@@ -50,7 +50,7 @@ const userSchema = new mongoose.Schema(
 
         profilePic: {
             type: String,
-            default: ".../public/defaultProfilePic.png",
+            default: "https://res.cloudinary.com/reyaz9ss/image/upload/v1784055516/defaultProfilePic_mchkmf.png",
         },
 
         refreshToken: {
