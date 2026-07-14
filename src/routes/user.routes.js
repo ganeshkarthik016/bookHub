@@ -9,6 +9,7 @@ import {
     getCurrentUser,
     updateProfilePic,
     deleteUser,
+    getUserProfile
 } from "../controllers/user.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { uploadImage } from "../middlewares/multer.middleware.js";
@@ -36,10 +37,10 @@ router.route("/update-profile-pic").post(verifyJWT, uploadImage.single("profileP
 
 //get
 router.route("/get-current-user").get(verifyJWT, getCurrentUser);
+router.route("/c/:username").get(verifyJWT, getUserProfile);
 
 //delete
 router.route("/delete-account").delete(verifyJWT, deleteUser);
-
 
 
 

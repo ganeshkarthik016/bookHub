@@ -5,6 +5,7 @@ import { apiResponse } from "../utils/apiResponse.js";
 import jwt from "jsonwebtoken";
 import { REFRESH_TOKEN_SECRET } from "../constants.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import mongoose from "mongoose";
 
 const registerUser = asyncHandler(async (req, res) => {
     const { userFullName, email, userName, password, bio } = req.body;
@@ -345,6 +346,86 @@ const deleteUser = asyncHandler(async (req, res) => {
 
 })
 
+const getUserProfile = asyncHandler(async (req, res) => {
+    const { userName } = req.params;
+
+    if (!userName?.trim()) {
+        throw new apiError(400, "Username is required");
+    }
+
+    const profile = await User.aggregate([
+        {
+            $match: {
+                userName: userName.trim().toLowerCase(),
+            },
+        },
+
+        // People following this user
+        {
+            $lookup: {
+                from: "follows",
+                localField: "_id",
+                foreignField: "following",
+                as: "followers",
+            },
+        },
+
+        // People this user follows
+        {
+            $lookup: {
+                from: "follows",
+                localField: "_id",
+                foreignField: "follower",
+                as: "following",
+            },
+        },
+
+        {
+            $addFields: {
+                followersCount: {
+                    $size: "$followers",
+                },
+
+                followingCount: {
+                    $size: "$following",
+                },
+
+                isFollowing: {
+                    $in: [
+                        req.user?._id,
+                        "$followers.follower",
+                    ],
+                },
+            },
+        },
+
+        {
+            $project: {
+                password: 0,
+                refreshToken: 0,
+
+                followers: 0,
+                following: 0,
+
+                __v: 0,
+                updatedAt: 0,
+            },
+        },
+    ]);
+
+    if (!profile.length) {
+        throw new apiError(404, "User not found");
+    }
+
+    return res.status(200).json(
+        new apiResponse(
+            200,
+            profile[0],
+            "Profile fetched successfully"
+        )
+    );
+});
+
 
 
 
@@ -358,4 +439,6 @@ export {
     , getCurrentUser
     , updateProfilePic
     , deleteUser
+    , getUserProfile
+
 };
