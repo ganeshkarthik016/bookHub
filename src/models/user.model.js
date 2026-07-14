@@ -57,12 +57,6 @@ const userSchema = new mongoose.Schema(
             type: String,
         },
 
-        watchHistory: [
-            {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "Note",
-            },
-        ],
     },
     {
         timestamps: true,

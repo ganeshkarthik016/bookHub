@@ -4,35 +4,40 @@ const noteSchema = new mongoose.Schema(
     {
         title: {
             type: String,
-            required: true,
-            trim: true,
+            required: true
         },
 
-        content: {
+        description: {
             type: String,
-            required: true,
-            trim: true,
+            default: ""
         },
 
-        tags: {
-            type: [String],
-            default: [],
+        pdf: {
+            url: String,
+            publicId: String
         },
 
-        likeCount: {
-            type: Number,
-            default: 0
+        coverImage: {
+            url: String,
+            publicId: String
         },
 
         owner: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
             required: true,
+            index: true
         },
+
+        tags: [String],
+
+        isPrivate: {
+            type: Boolean,
+            default: false
+        }
     },
     {
-        timestamps: true,
-    }
-);
+        timestamps: true
+    });
 
 export const Note = mongoose.model("Note", noteSchema);

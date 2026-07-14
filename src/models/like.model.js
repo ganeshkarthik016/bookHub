@@ -1,16 +1,16 @@
 import mongoose from "mongoose";
 
-const followSchema = new mongoose.Schema(
+const likeSchema = new mongoose.Schema(
     {
-        follower: {
+        user: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
             required: true
         },
 
-        following: {
+        note: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
+            ref: "Note",
             required: true
         }
     },
@@ -18,13 +18,13 @@ const followSchema = new mongoose.Schema(
         timestamps: true
     });
 
-followSchema.index(
+likeSchema.index(
     {
-        follower: 1,
-        following: 1
+        user: 1,
+        note: 1
     },
     {
         unique: true
     });
 
-export const Follow = mongoose.model("Follow", followSchema);
+export const Like = mongoose.model("Like", likeSchema);

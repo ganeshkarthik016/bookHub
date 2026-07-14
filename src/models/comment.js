@@ -1,30 +1,27 @@
 import mongoose from "mongoose";
 
-const followSchema = new mongoose.Schema(
+const commentSchema = new mongoose.Schema(
     {
-        follower: {
+        note: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Note",
+            required: true
+        },
+
+        user: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
             required: true
         },
 
-        following: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
-            required: true
+        text: {
+            type: String,
+            required: true,
+            trim: true
         }
     },
     {
         timestamps: true
     });
 
-followSchema.index(
-    {
-        follower: 1,
-        following: 1
-    },
-    {
-        unique: true
-    });
-
-export const Follow = mongoose.model("Follow", followSchema);
+export const Comment = mongoose.model("Comment", commentSchema);

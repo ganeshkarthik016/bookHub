@@ -1,28 +1,25 @@
 import mongoose from "mongoose";
 
-const saveSchema = new mongoose.Schema(
+const playlistSchema = new mongoose.Schema(
     {
-        user: {
+        name: {
+            type: String,
+            required: true
+        },
+
+        description: {
+            type: String,
+            default: ""
+        },
+
+        owner: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
-            required: true,
-        },
-
-        note: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Note",
-            required: true,
-        },
+            required: true
+        }
     },
     {
-        timestamps: true,
-    }
-);
+        timestamps: true
+    });
 
-// Prevent duplicate saves
-saveSchema.index(
-    { user: 1, note: 1 },
-    { unique: true }
-);
-
-export const Save = mongoose.model("Save", saveSchema);
+export const Playlist = mongoose.model("Playlist", playlistSchema);
