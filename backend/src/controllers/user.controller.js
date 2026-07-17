@@ -42,7 +42,7 @@ const registerUser = asyncHandler(async (req, res) => {
     const profilePicPath = req.files?.profilePic?.[0]?.path;
 
     if (profilePicPath) {
-        const uploaded = await uploadOnCloudinary(profilePicPath);
+        const uploaded = await uploadOnCloudinary(profilePicPath, bookhub / profilepic);
 
         if (!uploaded) {
             throw new apiError(500, "Failed to upload profile picture");
@@ -276,7 +276,7 @@ const updateProfilePic = asyncHandler(async (req, res) => {
     if (!profilePicPath) {
         throw new apiError(400, "Profile picture is required")
     }
-    const uploaded = await uploadOnCloudinary(profilePicPath);
+    const uploaded = await uploadOnCloudinary(profilePicPath, bookhub / profilepic);
     if (!uploaded.secure_url) {
         throw new apiError(500, "Failed to upload profile picture")
     }
@@ -307,43 +307,6 @@ const getCurrentUser = asyncHandler(async (req, res) => {
             "User found successfully"
         )
     )
-})
-
-// delete 
-
-const deleteUser = asyncHandler(async (req, res) => {
-    const password = req.body.password;
-    if (!password) {
-        throw new apiError(400, "Password is required")
-    }
-    const user = await User.findById(req.user._id);
-    if (!user) {
-        throw new apiError(404, "User not found")
-    }
-    const isPasswordCorrect =
-        await user.isPasswordCorrect(password);
-    if (!isPasswordCorrect) {
-        throw new apiError(401, "Invalid credentials")
-    }
-    user.refreshToken = undefined;
-    await user.save({ validateBeforeSave: false });
-    await user.deleteOne();
-    const options = {
-        httpOnly: true,
-        secure: true,
-    };
-
-    return res.status(200)
-        .clearCookie("refreshToken", options)
-        .clearCookie("accessToken", options)
-        .json(
-            new apiResponse(
-                200,
-                { message: "User deleted successfully" },
-                "User deleted successfully"
-            )
-        )
-
 })
 
 const getUserProfile = asyncHandler(async (req, res) => {
@@ -425,6 +388,44 @@ const getUserProfile = asyncHandler(async (req, res) => {
         )
     );
 });
+// delete 
+
+const deleteUser = asyncHandler(async (req, res) => {
+    const password = req.body.password;
+    if (!password) {
+        throw new apiError(400, "Password is required")
+    }
+    const user = await User.findById(req.user._id);
+    if (!user) {
+        throw new apiError(404, "User not found")
+    }
+    const isPasswordCorrect =
+        await user.isPasswordCorrect(password);
+    if (!isPasswordCorrect) {
+        throw new apiError(401, "Invalid credentials")
+    }
+    user.refreshToken = undefined;
+    await user.save({ validateBeforeSave: false });
+    await user.deleteOne();
+    const options = {
+        httpOnly: true,
+        secure: true,
+    };
+
+    return res.status(200)
+        .clearCookie("refreshToken", options)
+        .clearCookie("accessToken", options)
+        .json(
+            new apiResponse(
+                200,
+                { message: "User deleted successfully" },
+                "User deleted successfully"
+            )
+        )
+
+})
+
+
 
 
 

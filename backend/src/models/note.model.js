@@ -4,40 +4,85 @@ const noteSchema = new mongoose.Schema(
     {
         title: {
             type: String,
-            required: true
+            required: true,
+            trim: true,
+            index: true,
         },
 
         description: {
             type: String,
-            default: ""
+            default: "",
+            trim: true,
         },
 
         pdf: {
-            url: String,
-            publicId: String
+            url: {
+                type: String,
+                required: true,
+            },
+            publicId: {
+                type: String,
+                required: true,
+            },
         },
 
         coverImage: {
-            url: String,
-            publicId: String
+            url: {
+                type: String,
+                default: "",
+            },
+            publicId: {
+                type: String,
+                default: "",
+            },
         },
 
         owner: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
             required: true,
-            index: true
+            index: true,
         },
 
-        tags: [String],
+        tags: [
+            {
+                type: String,
+                trim: true,
+                lowercase: true,
+            },
+        ],
 
         isPrivate: {
             type: Boolean,
-            default: false
-        }
+            default: false,
+            index: true,
+        },
+
+        views: {
+            type: Number,
+            default: 0,
+        },
+
+        likesCount: {
+            type: Number,
+            default: 0,
+            index: true,
+        },
+
+        downloads: {
+            type: Number,
+            default: 0,
+        },
     },
     {
-        timestamps: true
-    });
+        timestamps: true,
+    }
+);
+
+// Useful indexes
+noteSchema.index({ owner: 1, createdAt: -1 });
+noteSchema.index({ likesCount: -1 });
+noteSchema.index({ createdAt: -1 });
+noteSchema.index({ tags: 1 });
 
 export const Note = mongoose.model("Note", noteSchema);

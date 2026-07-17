@@ -49,6 +49,29 @@ const createUploader = (allowedMimeTypes, maxSize) => {
         },
     });
 };
+export const uploadNoteFiles = multer({
+    storage,
+
+    fileFilter(req, file, cb) {
+        const allowedTypes = [
+            "application/pdf",
+            "image/jpeg",
+            "image/jpg",
+            "image/png",
+            "image/webp",
+        ];
+
+        if (allowedTypes.includes(file.mimetype)) {
+            return cb(null, true);
+        }
+
+        cb(new Error("Invalid file type"), false);
+    },
+
+    limits: {
+        fileSize: 20 * 1024 * 1024,
+    },
+});
 
 // Image uploader
 export const uploadImage = createUploader(
