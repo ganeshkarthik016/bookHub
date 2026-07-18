@@ -24,6 +24,10 @@ import noteRouter from './routes/note.route.js'
 
 app.use("/api/v1/notes", noteRouter)
 
+import likeRouter from './routes/like.route.js'
+
+app.use("/api/v1/likes", likeRouter)
+
 
 app.use((err, req, res, next) => {
     res.status(err.statusCode || 500).json({

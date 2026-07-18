@@ -3,7 +3,61 @@ import { Note } from "../models/note.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { apiError } from "../utils/apiError.js";
 import { apiResponse } from "../utils/apiResponse.js";
+import { Follow } from "../models/follow.model.js";
 
+//push
+const toggleLike = asyncHandler(async (req, res) => {
+    const { noteId } = req.params;
+
+    const note = await Note.findById(noteId);
+
+    if (!note) {
+        throw new apiError(404, "Note not found");
+    }
+
+    const existingLike = await Like.findOne({
+        user: req.user._id,
+        note: noteId,
+    });
+
+    if (existingLike) {
+        await existingLike.deleteOne();
+
+        note.likesCount = Math.max(0, note.likesCount - 1);
+        await note.save({ validateBeforeSave: false });
+
+        return res.status(200).json(
+            new apiResponse(
+                200,
+                {
+                    liked: false,
+                    likesCount: note.likesCount,
+                },
+                "Note unliked successfully"
+            )
+        );
+    }
+
+    await Like.create({
+        user: req.user._id,
+        note: noteId,
+    });
+
+    note.likesCount += 1;
+
+    await note.save({ validateBeforeSave: false });
+
+    return res.status(200).json(
+        new apiResponse(
+            200,
+            {
+                liked: true,
+                likesCount: note.likesCount,
+            },
+            "Note liked successfully"
+        )
+    );
+});
 
 //get 
 const getUserLikes = asyncHandler(async (req, res) => {
@@ -96,8 +150,81 @@ const getUserLikes = asyncHandler(async (req, res) => {
     );
 });
 
+const isLiked = asyncHandler(async (req, res) => {
+    const { noteId } = req.params;
 
-const
+    const like = await Like.findOne({
+        user: req.user._id,
+        note: noteId,
+    });
+
+    return res.status(200).json(
+        new apiResponse(
+            200,
+            {
+                liked: !!like,
+            },
+            "Status fetched successfully"
+        )
+    );
+});
+
+const getNoteLikes = asyncHandler(async (req, res) => {
+    const { noteId } = req.params;
+
+    const note = await Note.findById(noteId);
+
+    if (!note) {
+        throw new apiError(404, "Note not found");
+    }
+
+    // All likes for this note
+    const likes = await Like.find({
+        note: noteId,
+    })
+        .populate(
+            "user",
+            "userName userFullName profilePic"
+        )
+        .sort({ createdAt: -1 });
+
+    // Users followed by current user
+    const following = await Follow.find({
+        follower: req.user._id,
+    }).select("following");
+
+    const followingSet = new Set(
+        following.map(f => f.following.toString())
+    );
+
+    const followingLikes = [];
+    const otherLikes = [];
+
+    for (const like of likes) {
+        if (followingSet.has(like.user._id.toString())) {
+            followingLikes.push(like);
+        } else {
+            otherLikes.push(like);
+        }
+    }
+
+    return res.status(200).json(
+        new apiResponse(
+            200,
+            {
+                likesCount: note.likesCount,
+                following: followingLikes,
+                others: otherLikes,
+            },
+            "Likes fetched successfully"
+        )
+    );
+});
+
 export {
     getUserLikes
+    , toggleLike
+    , isLiked
+    , getNoteLikes
+
 }
