@@ -4,6 +4,7 @@ import { User } from "../models/user.model.js";
 import { apiResponse } from "../utils/apiResponse.js";
 import jwt from "jsonwebtoken";
 import { REFRESH_TOKEN_SECRET } from "../constants.js";
+import { DEFAULT_PROFILE_PIC } from "../constants.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import mongoose from "mongoose";
 
@@ -42,13 +43,19 @@ const registerUser = asyncHandler(async (req, res) => {
     const profilePicPath = req.files?.profilePic?.[0]?.path;
 
     if (profilePicPath) {
-        const uploaded = await uploadOnCloudinary(profilePicPath, bookhub / profilepic);
+        const uploaded = await uploadOnCloudinary(
+            profilePicPath,
+            "bookhub/profilepic"
+        );
 
         if (!uploaded) {
             throw new apiError(500, "Failed to upload profile picture");
         }
 
-        profilePic = uploaded.secure_url;
+        profilePic = {
+            url: uploaded.secure_url,
+            publicId: uploaded.public_id,
+        };
     }
 
     const user = await User.create({
@@ -272,27 +279,56 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
 })
 
 const updateProfilePic = asyncHandler(async (req, res) => {
-    const profilePicPath = req.file.path;
+    const profilePicPath = req.file?.path;
+
+
     if (!profilePicPath) {
-        throw new apiError(400, "Profile picture is required")
+        throw new apiError(400, "Profile picture is required");
     }
-    const uploaded = await uploadOnCloudinary(profilePicPath, bookhub / profilepic);
-    if (!uploaded.secure_url) {
-        throw new apiError(500, "Failed to upload profile picture")
-    }
-    const user = await User.findByIdAndUpdate(req.user?._id, { $set: { profilePic: uploaded.secure_url } }, { new: true })
-        .select("-password -refreshToken");
+
+    const user = await User.findById(req.user._id);
+
     if (!user) {
-        throw new apiError(404, "User not found")
+        throw new apiError(404, "User not found");
     }
+
+    const uploaded = await uploadOnCloudinary(
+        profilePicPath,
+        "bookhub/profilepic"
+    );
+
+    if (!uploaded) {
+        throw new apiError(500, "Failed to upload profile picture");
+    }
+
+    // Delete previous custom profile picture
+    if (
+        user.profilePic.publicId &&
+        user.profilePic.url !== DEFAULT_PROFILE_PIC
+    ) {
+        await cloudinary.uploader.destroy(
+            user.profilePic.publicId
+        );
+    }
+
+    // Update user's profile picture
+
+
+    user.profilePic = {
+        url: uploaded.secure_url,
+        publicId: uploaded.public_id,
+    };
+
+    await user.save({ validateBeforeSave: false });
+
     return res.status(200).json(
         new apiResponse(
             200,
             user,
             "Profile picture updated successfully"
         )
-    )
-})
+    );
+});
 
 //get controllers
 const getCurrentUser = asyncHandler(async (req, res) => {

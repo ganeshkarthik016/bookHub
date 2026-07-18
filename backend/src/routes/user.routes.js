@@ -31,13 +31,14 @@ router.route("/login").post(loginUser);
 //secure  route
 router.route("/logout").post(verifyJWT, logoutUser);
 router.route("/refresh-token").post(refreshAccessToken);
-router.route("/change-password").post(verifyJWT, changePassword);
-router.route("/update-account-details").post(verifyJWT, updateAccountDetails);
-router.route("/update-profile-pic").post(verifyJWT, uploadImage.single("profilePic"), updateProfilePic);
+//patch
+router.route("/change-password").patch(verifyJWT, changePassword);
+router.route("/update-account-details").patch(verifyJWT, updateAccountDetails);
+router.route("/update-profile-pic").patch(verifyJWT, uploadImage.single("profilePic"), updateProfilePic);
 
 //get
 router.route("/get-current-user").get(verifyJWT, getCurrentUser);
-router.route("/c/:username").get(verifyJWT, getUserProfile);
+router.route("/profile/:username").get(verifyJWT, getUserProfile);
 
 //delete
 router.route("/delete-account").delete(verifyJWT, deleteUser);

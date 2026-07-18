@@ -39,3 +39,5 @@ export const CLOUDINARY_API_KEY =
     process.env.CLOUDINARY_API_KEY;
 export const CLOUDINARY_API_SECRET =
     process.env.CLOUDINARY_API_SECRET;
+export const DEFAULT_PROFILE_PIC =
+    "https://res.cloudinary.com/reyaz9ss/image/upload/v1784055516/defaultProfilePic_mchkmf.png";

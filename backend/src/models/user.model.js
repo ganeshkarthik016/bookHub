@@ -47,10 +47,15 @@ const userSchema = new mongoose.Schema(
             default: "",
             trim: true,
         },
-
         profilePic: {
-            type: String,
-            default: "https://res.cloudinary.com/reyaz9ss/image/upload/v1784055516/defaultProfilePic_mchkmf.png",
+            url: {
+                type: String,
+                default: "https://res.cloudinary.com/reyaz9ss/image/upload/v1784055516/defaultProfilePic_mchkmf.png",
+            },
+            publicId: {
+                type: String,
+                default: "",
+            }
         },
 
         refreshToken: {

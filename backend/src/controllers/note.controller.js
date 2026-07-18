@@ -127,6 +127,85 @@ const updateNoteDetails = asyncHandler(async (req, res) => {
     )
 })
 
+const updateNote = asyncHandler(async (req, res) => {
+    const { noteId } = req.params;
+    const pdfPath = req.files?.pdf?.[0]?.path;
+    const coverImagePath = req.files?.coverImage?.[0]?.path;
+    if (!pdfPath && !coverImagePath) {
+        throw new apiError(
+            400,
+            "Please upload a PDF or cover image"
+        );
+    }
+    const note = await Note.findById(noteId);
+
+    if (!note) {
+        throw new apiError(404, "Note not found");
+    }
+    if (note.owner.toString() !== req.user._id.toString()) {
+        throw new apiError(403, "You are not authorized");
+    }
+    let uploadedPdf = null;
+    let uploadedCover = null;
+    if (coverImagePath) {
+
+        uploadedCover = await uploadOnCloudinary(
+            coverImagePath,
+            "bookhub/covers"
+        );
+
+        if (!uploadedCover) {
+            throw new apiError(500, "Failed to upload cover image");
+        }
+    }
+    if (pdfPath) {
+
+        uploadedPdf = await uploadOnCloudinary(
+            pdfPath,
+            "bookhub/pdfs"
+        );
+
+        if (!uploadedPdf) {
+            throw new apiError(500, "Failed to upload pdf");
+        }
+    }
+
+    if (uploadedCover) {
+        if (uploadedCover && note.coverImage.publicId) {
+            await cloudinary.uploader.destroy(
+                note.coverImage.publicId
+            );
+        }
+
+        note.coverImage.url = uploadedCover.secure_url;
+        note.coverImage.publicId = uploadedCover.public_id;
+
+    }
+    if (uploadedPdf) {
+        if (uploadedPdf && note.pdf.publicId) {
+            await cloudinary.uploader.destroy(
+                note.pdf.publicId,
+                {
+                    resource_type: "raw"
+                }
+            );
+        }
+        note.pdf.url = uploadedPdf.secure_url;
+        note.pdf.publicId = uploadedPdf.public_id;
+    }
+    await note.save({ validateBeforeSave: false });
+    const newNote = await Note.findById(noteId);
+    if (!newNote) {
+        throw new apiError(404, "Note not found")
+    }
+    return res.status(200).json(
+        new apiResponse(
+            200,
+            newNote,
+            "Note updated successfully"
+        )
+    )
+})
 
 
 // get 
@@ -152,8 +231,49 @@ const getCurrentNote = asyncHandler(async (req, res) => {
     );
 });
 
+const getMyNotes = asyncHandler(async (req, res) => {
+    const { sort } = req.query;
+
+    let sortOption = { createdAt: -1 }; // default: newest
+
+    switch (sort) {
+        case "oldest":
+            sortOption = { createdAt: 1 };
+            break;
+
+        case "popular":
+            sortOption = { likesCount: -1 };
+            break;
+
+        case "views":
+            sortOption = { views: -1 };
+            break;
+
+        case "downloads":
+            sortOption = { downloads: -1 };
+            break;
+    }
+
+    const notes = await Note.find({
+        owner: req.user._id
+    }).sort(sortOption);
+
+    return res.status(200).json(
+        new apiResponse(
+            200,
+            notes,
+            "Notes fetched successfully"
+        )
+    );
+});
+
+
+
 export {
     uploadNotes
     , updateNoteDetails
     , getCurrentNote
+    , getMyNotes
+    , updateNote
+
 };
