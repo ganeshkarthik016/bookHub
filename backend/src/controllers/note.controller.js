@@ -2,7 +2,10 @@ import { Note } from "../models/note.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { apiError } from "../utils/apiError.js";
 import { apiResponse } from "../utils/apiResponse.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import {
+    uploadOnCloudinary,
+    cloudinary
+} from "../utils/cloudinary.js";
 
 const uploadNotes = asyncHandler(async (req, res) => {
 
@@ -184,12 +187,12 @@ const updateNote = asyncHandler(async (req, res) => {
     }
     if (uploadedPdf) {
         if (uploadedPdf && note.pdf.publicId) {
-            await cloudinary.uploader.destroy(
-                note.pdf.publicId,
-                {
-                    resource_type: "raw"
-                }
+            const result = await cloudinary.uploader.destroy(
+                note.pdf.publicId
             );
+
+            console.log(result);
+            console.log(note.pdf.publicId);
         }
         note.pdf.url = uploadedPdf.secure_url;
         note.pdf.publicId = uploadedPdf.public_id;
@@ -451,8 +454,7 @@ const deleteNote = asyncHandler(async (req, res) => {
     }
     if (note.pdf.publicId) {
         await cloudinary.uploader.destroy(
-            note.pdf.publicId,
-            { resource_type: "raw" }
+            note.pdf.publicId
         );
     }
 

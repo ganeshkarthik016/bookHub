@@ -12,7 +12,7 @@ cloudinary.config({
     api_key: CLOUDINARY_API_KEY,
     api_secret: CLOUDINARY_API_SECRET,
 });
-
+export { cloudinary }
 // Upload any file
 const uploadOnCloudinary = async (
     localFilePath,

@@ -5,7 +5,10 @@ import { apiResponse } from "../utils/apiResponse.js";
 import jwt from "jsonwebtoken";
 import { REFRESH_TOKEN_SECRET } from "../constants.js";
 import { DEFAULT_PROFILE_PIC } from "../constants.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import {
+    uploadOnCloudinary,
+    cloudinary,
+} from "../utils/cloudinary.js";
 import mongoose from "mongoose";
 
 const registerUser = asyncHandler(async (req, res) => {
@@ -439,6 +442,14 @@ const deleteUser = asyncHandler(async (req, res) => {
         await user.isPasswordCorrect(password);
     if (!isPasswordCorrect) {
         throw new apiError(401, "Invalid credentials")
+    }
+    if (
+        user.profilePic.publicId &&
+        user.profilePic.url !== DEFAULT_PROFILE_PIC
+    ) {
+        await cloudinary.uploader.destroy(
+            user.profilePic.publicId
+        );
     }
     user.refreshToken = undefined;
     await user.save({ validateBeforeSave: false });
