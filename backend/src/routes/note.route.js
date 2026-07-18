@@ -2,7 +2,7 @@ import { Router } from "express";
 import {
     uploadNotes,
     updateNoteDetails,
-    getCUrrentNote,
+    getCurrentNote,
 } from "../controllers/note.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { uploadNoteFiles } from "../middlewares/multer.middleware.js";
@@ -33,7 +33,7 @@ router.route("/update-note-details/:noteId").post(
 //get 
 router.route("/get-current-note/:noteId").get(
     verifyJWT,
-    getCUrrentNote
+    getCurrentNote
 );
 
 

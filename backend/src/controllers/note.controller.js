@@ -155,5 +155,5 @@ const getCurrentNote = asyncHandler(async (req, res) => {
 export {
     uploadNotes
     , updateNoteDetails
-    , getCUrrentNote
+    , getCurrentNote
 };
