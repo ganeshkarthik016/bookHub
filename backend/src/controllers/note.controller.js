@@ -86,6 +86,7 @@ const uploadNotes = asyncHandler(async (req, res) => {
     );
 });
 
+//petch
 const updateNoteDetails = asyncHandler(async (req, res) => {
     const { title, description, tags, isPrivate } = req.body;
     const { noteId } = req.params;
@@ -233,6 +234,8 @@ const getCurrentNote = asyncHandler(async (req, res) => {
 
 const getMyNotes = asyncHandler(async (req, res) => {
     const { sort } = req.query;
+    const page = Math.max(Number(req.query.page) || 1, 1);
+    const limit = Math.min(Math.max(Number(req.query.limit) || 10, 1), 50);
 
     let sortOption = { createdAt: -1 }; // default: newest
 
@@ -256,15 +259,217 @@ const getMyNotes = asyncHandler(async (req, res) => {
 
     const notes = await Note.find({
         owner: req.user._id
-    }).sort(sortOption);
+    }).sort(sortOption)
+        .skip((page - 1) * limit)
+        .limit(limit);
 
     return res.status(200).json(
         new apiResponse(
             200,
-            notes,
+            {
+                notes,
+                page,
+                limit
+            },
             "Notes fetched successfully"
         )
     );
+});
+
+const getUserNotes = asyncHandler(async (req, res) => {
+    const { userName } = req.params;
+    const { sort } = req.query;
+    const page = Math.max(Number(req.query.page) || 1, 1);
+    const limit = Math.min(Math.max(Number(req.query.limit) || 10, 1), 50);
+
+    let sortOption = { createdAt: -1 };
+    switch (sort) {
+        case "oldest":
+            sortOption = { createdAt: 1 };
+            break;
+
+        case "popular":
+            sortOption = { likesCount: -1 };
+            break;
+
+        case "views":
+            sortOption = { views: -1 };
+            break;
+
+        case "downloads":
+            sortOption = { downloads: -1 };
+            break;
+    }
+    const user = await User.findOne({
+        userName: userName.trim().toLowerCase()
+    });
+
+    if (!user) {
+        throw new apiError(404, "User not found");
+    }
+
+    const userId = user._id;
+
+    const notes = await Note.find({
+        owner: userId,
+        isPrivate: false
+    }).sort(sortOption)
+        .skip((page - 1) * limit)
+        .limit(limit);
+
+    return res.status(200).json(
+        new apiResponse(
+            200,
+            {
+                notes,
+                page,
+                limit,
+            },
+            "Notes fetched successfully"
+        )
+    )
+
+})
+
+const searchNotes = asyncHandler(async (req, res) => {
+    const {
+        search,
+        tag,
+        sort,
+        page = 1,
+        limit = 10,
+    } = req.query;
+
+    const pageNo = Math.max(Number(page), 1);
+    const pageLimit = Math.min(Math.max(Number(limit), 1), 50);
+
+    let filter = {
+        isPrivate: false,
+    };
+
+    // Search title or description
+    filter.$or = [
+        {
+            title: {
+                $regex: search.trim(),
+                $options: "i",
+            },
+        },
+        {
+            description: {
+                $regex: search.trim(),
+                $options: "i",
+            },
+        },
+        {
+            tags: {
+                $regex: search.trim(),
+                $options: "i",
+            },
+        },
+    ];
+
+    // Search by tag
+    if (tag?.trim()) {
+        filter.tags = tag.trim().toLowerCase();
+    }
+
+    let sortOption = { createdAt: -1 };
+
+    switch (sort) {
+        case "oldest":
+            sortOption = { createdAt: 1 };
+            break;
+
+        case "popular":
+            sortOption = { likesCount: -1 };
+            break;
+
+        case "views":
+            sortOption = { views: -1 };
+            break;
+
+        case "downloads":
+            sortOption = { downloads: -1 };
+            break;
+    }
+
+    const notes = await Note.find(filter)
+        .sort(sortOption)
+        .skip((pageNo - 1) * pageLimit)
+        .limit(pageLimit);
+
+    return res.status(200).json(
+        new apiResponse(
+            200,
+            {
+                notes,
+                page: pageNo,
+                limit: pageLimit,
+                hasMore: notes.length === pageLimit,
+            },
+            "Notes fetched successfully"
+        )
+    );
+})
+
+const downloadNote = asyncHandler(async (req, res) => {
+    const { noteId } = req.params;
+
+    const note = await Note.findById(noteId);
+
+    if (!note) {
+        throw new apiError(404, "Note not found");
+    }
+
+    if (note.isPrivate && note.owner.toString() !== req.user._id.toString()) {
+        throw new apiError(403, "Unauthorized");
+    }
+
+    note.downloads += 1;
+    await note.save({ validateBeforeSave: false });
+
+    return res.status(200).json(
+        new apiResponse(
+            200,
+            {
+                downloadUrl: note.pdf.url
+            },
+            "Download started"
+        )
+    );
+});
+//delete
+const deleteNote = asyncHandler(async (req, res) => {
+    const { noteId } = req.params;
+    const note = await Note.findById(noteId);
+    if (!note) {
+        throw new apiError(404, "Note not found");
+    }
+    if (req.user._id.toString() !== note.owner.toString()) {
+        throw new apiError(403, "You are not authorized to delete this note")
+    }
+    if (note.pdf.publicId) {
+        await cloudinary.uploader.destroy(
+            note.pdf.publicId,
+            { resource_type: "raw" }
+        );
+    }
+
+    if (note.coverImage.publicId) {
+        await cloudinary.uploader.destroy(
+            note.coverImage.publicId
+        );
+    }
+    await note.deleteOne();
+    return res.status(200).json(
+        new apiResponse(
+            200,
+            { message: "Note deleted successfully" },
+            "Note deleted successfully"
+        )
+    )
+
 });
 
 
@@ -275,5 +480,9 @@ export {
     , getCurrentNote
     , getMyNotes
     , updateNote
+    , deleteNote
+    , getUserNotes
+    , searchNotes
+    , downloadNote
 
 };

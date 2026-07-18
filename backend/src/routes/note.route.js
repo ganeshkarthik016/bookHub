@@ -5,6 +5,10 @@ import {
     getCurrentNote,
     getMyNotes,
     updateNote,
+    deleteNote,
+    getUserNotes,
+    searchNotes,
+    downloadNote,
 } from "../controllers/note.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { uploadNoteFiles } from "../middlewares/multer.middleware.js";
@@ -54,6 +58,23 @@ router.route("/get-my-notes").get(
     verifyJWT,
     getMyNotes
 );
+router.route("/get-user-notes/:userName").get(
+    getUserNotes
+);
+router.route("/search-notes").get(
+    searchNotes
+);
+router.route("/download-note/:noteId").get(
+    verifyJWT,
+    downloadNote
+);
+
+//delete
+router.route("/delete-note/:noteId").delete(
+    verifyJWT,
+    deleteNote
+);
+
 
 
 
