@@ -1,6 +1,7 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { apiError } from "../utils/apiError.js";
 import { User } from "../models/user.model.js";
+import { Follow } from "../models/follow.model.js";
 import { apiResponse } from "../utils/apiResponse.js";
 import jwt from "jsonwebtoken";
 import { REFRESH_TOKEN_SECRET } from "../constants.js";
@@ -335,18 +336,34 @@ const updateProfilePic = asyncHandler(async (req, res) => {
 
 //get controllers
 const getCurrentUser = asyncHandler(async (req, res) => {
-    const user = await User.findById(req.user._id).select("-password -refreshToken");
+    const user = await User.findById(req.user._id)
+        .select("-password -refreshToken");
+
     if (!user) {
-        throw new apiError(404, "User not found")
+        throw new apiError(404, "User not found");
     }
+
+    const [followersCount, followingCount] = await Promise.all([
+        Follow.countDocuments({
+            following: user._id,
+        }),
+        Follow.countDocuments({
+            follower: user._id,
+        }),
+    ]);
+
     return res.status(200).json(
         new apiResponse(
             200,
-            user,
-            "User found successfully"
+            {
+                ...user.toObject(),
+                followersCount,
+                followingCount,
+            },
+            "User fetched successfully"
         )
-    )
-})
+    );
+});
 
 const getUserProfile = asyncHandler(async (req, res) => {
     const { userName } = req.params;
@@ -355,74 +372,39 @@ const getUserProfile = asyncHandler(async (req, res) => {
         throw new apiError(400, "Username is required");
     }
 
-    const profile = await User.aggregate([
-        {
-            $match: {
-                userName: userName.trim().toLowerCase(),
-            },
-        },
+    const user = await User.findOne({
+        userName: userName.trim().toLowerCase(),
+    }).select("-password -refreshToken");
 
-        // People following this user
-        {
-            $lookup: {
-                from: "follows",
-                localField: "_id",
-                foreignField: "following",
-                as: "followers",
-            },
-        },
-
-        // People this user follows
-        {
-            $lookup: {
-                from: "follows",
-                localField: "_id",
-                foreignField: "follower",
-                as: "following",
-            },
-        },
-
-        {
-            $addFields: {
-                followersCount: {
-                    $size: "$followers",
-                },
-
-                followingCount: {
-                    $size: "$following",
-                },
-
-                isFollowing: {
-                    $in: [
-                        req.user?._id,
-                        "$followers.follower",
-                    ],
-                },
-            },
-        },
-
-        {
-            $project: {
-                password: 0,
-                refreshToken: 0,
-
-                followers: 0,
-                following: 0,
-
-                __v: 0,
-                updatedAt: 0,
-            },
-        },
-    ]);
-
-    if (!profile.length) {
+    if (!user) {
         throw new apiError(404, "User not found");
     }
+
+    const [followersCount, followingCount, isFollowing] =
+        await Promise.all([
+            Follow.countDocuments({
+                following: user._id,
+            }),
+
+            Follow.countDocuments({
+                follower: user._id,
+            }),
+
+            Follow.exists({
+                follower: req.user._id,
+                following: user._id,
+            }),
+        ]);
 
     return res.status(200).json(
         new apiResponse(
             200,
-            profile[0],
+            {
+                ...user.toObject(),
+                followersCount,
+                followingCount,
+                isFollowing: !!isFollowing,
+            },
             "Profile fetched successfully"
         )
     );

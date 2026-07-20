@@ -222,7 +222,7 @@ const getNoteComments = asyncHandler(async (req, res) => {
             "Comments fetched successfully"
         )
     );
-});
+});//make it faster... // later
 
 const editMyComment = asyncHandler(async (req, res) => {
     const userId = req.user._id
