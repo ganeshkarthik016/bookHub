@@ -28,6 +28,11 @@ import likeRouter from './routes/like.route.js'
 
 app.use("/api/v1/likes", likeRouter)
 
+import commentRouter from './routes/comment.route.js'
+
+app.use("/api/v1/comments", commentRouter)
+
+
 
 app.use((err, req, res, next) => {
     res.status(err.statusCode || 500).json({

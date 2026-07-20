@@ -222,8 +222,17 @@ const getCurrentNote = asyncHandler(async (req, res) => {
         throw new apiError(404, "Note not found");
     }
 
+    if (
+        note.isPrivate &&
+        note.owner.toString() !== req.user._id.toString()
+    ) {
+        throw new apiError(403, "Unauthorized");
+    }
+
+    // Increment only if viewer isn't the owner
     if (note.owner.toString() !== req.user._id.toString()) {
-        throw new apiError(403, "You are not authorized");
+        note.views += 1;
+        await note.save({ validateBeforeSave: false });
     }
 
     return res.status(200).json(
