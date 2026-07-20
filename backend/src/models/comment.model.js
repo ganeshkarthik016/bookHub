@@ -18,6 +18,10 @@ const commentSchema = new mongoose.Schema(
             type: String,
             required: true,
             trim: true
+        },
+        is_edited: {
+            type: Boolean,
+            default: false
         }
     },
     {

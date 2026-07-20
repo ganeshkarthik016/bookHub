@@ -1,6 +1,6 @@
 import { Note } from "../models/note.model";
 import { User } from "../models/user.model";
-import { comment } from "../models/comment.model";
+import { Comment, comment } from "../models/comment.model";
 import { follow } from "../models/follow.model";
 import { apiResponse } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler";
@@ -224,10 +224,91 @@ const getNoteComments = asyncHandler(async (req, res) => {
     );
 });
 
+const editMyComment = asyncHandler(async (req, res) => {
+    const userId = req.user._id
+    const { commentId } = req.params;
+    const { text } = req.body;
+    const comment = await Comment.findById(commentId);
+    if (!comment) {
+        throw new apiError(404, "Comment not found");
+    }
+    if (!text || text.trim() === "") {
+        throw new apiError(400, "Comment cannot be empty");
+    }
+    if (comment.user.toString() !== userId.toString()) {
+        throw new apiError(403, "You are not authorized to edit this comment")
+    }
+    if (comment.text === text.trim()) {
+        throw new apiError(400, "Comment cannot be same");
+    }
+    comment.text = text.trim();
+    comment.is_edited = true;
+    await comment.save({ validateBeforeSave: false });
+    const updatedComment = await Comment.findById(comment._id)
+        .populate("user", "userName userFullName profilePic");
+    return res.status(200).json(
+        new apiResponse(
+            200,
+            updatedComment,
+            "Comment updated successfully"
+        ))
+});
+
+const deleteMyComment = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+    const commentId = req.params.commentId;
+    const comment = await Comment.findById(commentId);
+    if (!comment) {
+        throw new apiError(404, "Comment not found");
+    }
+    if (comment.user.toString() !== userId.toString()) {
+        throw new apiError(403, "You are not authorized to delete this comment");
+    }
+    await comment.deleteOne();
+    return res.status(200).json(
+        new apiResponse(
+            200,
+            { message: "Comment deleted successfully" },
+            "Comment deleted successfully"
+        )
+    )
+})
+
+const getMyComments = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+    const page = Math.max(Number(req.query.page) || 1, 1);
+    const limit = Math.min(Math.max(Number(req.query.limit) || 10, 1), 50);
+    const comments = await Comment.find({ user: userId })
+        .populate("note", "title")
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit);
+    const totalComments = await Comment.countDocuments({
+        user: userId,
+    });
+    return res.status(200).json(
+        new apiResponse(
+            200,
+            {
+                comments,
+                page,
+                totalPages: Math.ceil(totalComments / limit),
+                totalComments,
+                hasMore: page * limit < totalComments,
+            },
+            "Comments fetched successfully"
+        )
+    )
+})
+
 
 
 
 export {
     addComment
-    ,
+    , getNoteComments
+    , editMyComment
+    , deleteMyComment
+    , getMyComments
+
 }
