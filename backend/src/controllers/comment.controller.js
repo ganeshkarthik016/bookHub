@@ -1,10 +1,10 @@
-import { Note } from "../models/note.model";
-import { User } from "../models/user.model";
-import { Comment, comment } from "../models/comment.model";
-import { follow } from "../models/follow.model";
+import { Note } from "../models/note.model.js";
+import { User } from "../models/user.model.js";
+import { Comment } from "../models/comment.model.js";
+import { Follow } from "../models/follow.model.js";
 import { apiResponse } from "../utils/apiResponse.js";
-import { asyncHandler } from "../utils/asyncHandler";
-import { apiError } from "../utils/apiError";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { apiError } from "../utils/apiError.js";
 import { Mongoose } from "mongoose";
 
 
