@@ -5,7 +5,7 @@ import { Follow } from "../models/follow.model.js";
 import { apiResponse } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { apiError } from "../utils/apiError.js";
-import { Mongoose } from "mongoose";
+import mongoose from "mongoose";
 
 
 const addComment = asyncHandler(async (req, res) => {
