@@ -29,7 +29,7 @@ router.route("/register").post(
 
 router.route("/login").post(loginUser);
 //secure  route
-router.route("/logout").post(verifyJWT, logoutUser);
+router.route("/logout").post(verifyJWT, logoutUser);//bug found;
 router.route("/refresh-token").post(refreshAccessToken);
 //patch
 router.route("/change-password").patch(verifyJWT, changePassword);
@@ -41,7 +41,10 @@ router.route("/get-current-user").get(verifyJWT, getCurrentUser);
 router.route("/profile/:username").get(verifyJWT, getUserProfile);
 
 //delete
-router.route("/delete-account").delete(verifyJWT, deleteUser);
+router.route("/delete-account").delete(verifyJWT, deleteUser);//same bug
+
+//all bugs debuged..
+//working good;
 
 
 

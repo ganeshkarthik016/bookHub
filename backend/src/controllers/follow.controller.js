@@ -169,16 +169,100 @@ const getMyFriends = asyncHandler(async (req, res) => {
         follower: userId
     }).select("following");
 
-    const friends = await Follow.find({
-        follower: {
-            $in: following.map(f => f.following)
+    const friends = await Follow.aggregate([
+        // Step 1: Get everyone I follow
+        {
+            $match: {
+                follower: new mongoose.Types.ObjectId(req.user._id),
+            },
         },
-        following: userId
-    })
-        .populate("following", "userName userFullName profilePic")
-        .sort({ createdAt: -1 })
-        .skip((page - 1) * limit)
-        .limit(limit);
+
+        // Step 2: Check if they follow me back
+        {
+            $lookup: {
+                from: "follows",
+                let: {
+                    friendId: "$following",
+                },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: {
+                                $and: [
+                                    {
+                                        $eq: [
+                                            "$follower",
+                                            "$$friendId",
+                                        ],
+                                    },
+                                    {
+                                        $eq: [
+                                            "$following",
+                                            new mongoose.Types.ObjectId(req.user._id),
+                                        ],
+                                    },
+                                ],
+                            },
+                        },
+                    },
+                ],
+                as: "mutual",
+            },
+        },
+
+        // Step 3: Keep only mutual follows
+        {
+            $match: {
+                mutual: {
+                    $ne: [],
+                },
+            },
+        },
+
+        // Step 4: Get user details
+        {
+            $lookup: {
+                from: "users",
+                localField: "following",
+                foreignField: "_id",
+                pipeline: [
+                    {
+                        $project: {
+                            userName: 1,
+                            userFullName: 1,
+                            profilePic: 1,
+                        },
+                    },
+                ],
+                as: "friend",
+            },
+        },
+
+        {
+            $unwind: "$friend",
+        },
+
+        // Step 5: Return only friend info
+        {
+            $replaceRoot: {
+                newRoot: "$friend",
+            },
+        },
+
+        {
+            $sort: {
+                userName: 1,
+            },
+        },
+
+        {
+            $skip: (page - 1) * limit,
+        },
+
+        {
+            $limit: limit,
+        },
+    ]);
     return res.status(200).json(
         new apiResponse(
             200,

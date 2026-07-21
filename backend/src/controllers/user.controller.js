@@ -143,7 +143,7 @@ const loginUser = asyncHandler(async (req, res) => {
 })
 // secure controlers
 const logoutUser = asyncHandler(async (req, res) => {
-    await User.findByIdAndUpdate(req.user._id, { $set: { refreshToken: undefined } }, { new: true });
+    await User.findByIdAndUpdate(req.user._id, { $set: { refreshToken: "" } }, { new: true });
     const options = {
         httpOnly: true,
         secure: true
@@ -433,7 +433,7 @@ const deleteUser = asyncHandler(async (req, res) => {
             user.profilePic.publicId
         );
     }
-    user.refreshToken = undefined;
+    user.refreshToken = "";
     await user.save({ validateBeforeSave: false });
     await user.deleteOne();
     const options = {
