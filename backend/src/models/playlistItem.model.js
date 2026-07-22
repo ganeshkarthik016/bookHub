@@ -5,8 +5,7 @@ const playlistItemSchema = new mongoose.Schema(
         playlist: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Playlist",
-            required: true,
-            index: true
+            required: true
         },
 
         note: {
@@ -14,11 +13,16 @@ const playlistItemSchema = new mongoose.Schema(
             ref: "Note",
             required: true,
             index: true
+        },
+        order: {
+            type: Number,
+            default: 0
         }
     },
     {
         timestamps: true
-    });
+    }
+);
 
 playlistItemSchema.index(
     {
@@ -27,7 +31,8 @@ playlistItemSchema.index(
     },
     {
         unique: true
-    });
+    }
+);
 
 export const PlaylistItem = mongoose.model(
     "PlaylistItem",
