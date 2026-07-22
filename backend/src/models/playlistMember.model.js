@@ -17,7 +17,6 @@ const playlistMemberSchema = new mongoose.Schema(
         role: {
             type: String,
             enum: [
-                "OWNER",
                 "EDITOR",
                 "VIEWER"
             ],

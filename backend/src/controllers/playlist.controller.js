@@ -9,22 +9,18 @@ import { apiResponse } from "../utils/apiResponse.js";
 
 //usefull function
 const isAuthorizedEditor = async (playlistId, userId) => {
-    const member = await PlaylistMember.findOne({
+    return !!(await PlaylistMember.exists({
         playlist: playlistId,
         user: userId,
         role: "EDITOR"
-    });
-    return !!member;
+    }));
 };
 
 const isAuthorizedViewer = async (playlistId, userId) => {
-    const member = await PlaylistMember.findOne({
+    return !!(await PlaylistMember.exists({
         playlist: playlistId,
-        user: userId,
-        role: "VIEWER"
-    });
-    const isEditor = await isAuthorizedEditor(playlistId, userId);
-    return (isEditor || !!member);
+        user: userId
+    }));
 };
 
 //post
