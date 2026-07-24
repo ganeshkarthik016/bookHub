@@ -334,6 +334,131 @@ const updateProfilePic = asyncHandler(async (req, res) => {
     );
 });
 
+const changeGmail = asyncHandler(async (req, res) => {
+    const { email } = req.body;
+    const userId = req.user._id;
+    const user = await User.findById(userId);
+    if (!user) {
+        throw new apiError(404, "User not found");
+    }
+    user.email = email.trim().toLowerCase();
+    user.refreshToken = "";
+    user.isVerified = false;
+    user.verifyOtp = "";
+    user.verifyOtpExpiry = null;
+    await user.save({ validateBeforeSave: false });
+    return res.status(200).json(
+        new apiResponse(
+            200,
+            {},
+            "Email changed successfully"
+        )
+    );
+
+});
+
+const forgetPasswordGenerateOtp = asyncHandler(async (req, res) => {
+    const { userName, email } = req.body;
+    if (
+        (!userName || userName.trim() === "") &&
+        (!email || email.trim() === "")
+    ) {
+        throw new apiError(400, "Username or email is required");
+    }
+    const user = await User.findone({
+        $or: [
+            { userName: userName.trim().toLowerCase() },
+            { email: email.trim().toLowerCase() },
+        ],
+    });
+    if (!user) {
+        throw new apiError(404, "User not found");
+    }
+    if (!user.isVerified) {
+        throw new apiError(400, "User email not verified");
+    }
+    if (
+        user.resetPasswordOtpExpiry &&
+        Date.now() < user.resetPasswordOtpExpiry
+    ) {
+        throw new apiError(
+            429,
+            "OTP already sent. Please wait."
+        );
+    }
+
+    const otp = crypto.randomInt(100000, 999999).toString();
+    const otpExpiry = new Date(Date.now() + 15 * 60 * 1000);
+
+    user.resetPasswordOtp = otp;
+    user.resetPasswordOtpExpiry = otpExpiry;
+    await user.save({ validateBeforeSave: false });
+
+    const message = `Hello!\n\nYour 6-digit password reset code is: ${otp}\n\nThis code will expire in 15 minutes.`;
+
+    const options = {
+        email: user.email,
+        subject: "Password Reset",
+        message,
+    };
+
+    await sendEmail(options);
+
+    return res.status(200).json(
+        new apiResponse(
+            200,
+            {},
+            "OTP sent successfully",
+        )
+    );
+});
+
+const verifyResetPasswordOtp = asyncHandler(async (req, res) => {
+    const { otp } = req.body;
+    const { newPassword, confirmPassword, email } = req.body;
+    if (!email || email?.trim() === "") {
+        throw new apiError(400, "Email is required");
+    }
+    if (!newPassword || !confirmPassword) {
+        throw new apiError(400, "New password and confirm password are required");
+    }
+    if (!otp) {
+        throw new apiError(400, "OTP is required");
+
+    }
+    if (newPassword !== confirmPassword) {
+        throw new apiError(400, "Passwords do not match");
+    }
+    const len = newPassword.length;
+    if (len < 8 || len > 64) {
+        throw new apiError(400, "Password must be between 8 and 64 characters");
+    }
+    const user = await User.findone({
+        email: email.trim().toLowerCase(),
+    });
+    if (!user) {
+        throw new apiError(404, "User not found");
+    }
+    if (!(await user.isResetPasswordOtpCorrect(otp))
+        || (!user.resetPasswordOtpExpiry ||
+            Date.now() > user.resetPasswordOtpExpiry)) {
+        throw new apiError(400, "Invalid OTP");
+    }
+    user.password = newPassword;
+    user.refreshAccessToken = "";
+    user.resetPasswordOtp = "";
+    user.resetPasswordOtpExpiry = null;
+    await user.save({ validateBeforeSave: false });
+    return res.status(200).json(
+        new apiResponse(
+            200,
+            {},
+            "Password reset successfully",
+        )
+    );
+
+});
+
 //get controllers
 const getCurrentUser = asyncHandler(async (req, res) => {
     const user = await User.findById(req.user._id)
@@ -454,7 +579,85 @@ const deleteUser = asyncHandler(async (req, res) => {
 
 })
 
+// to verify email
 
+import crypto from "crypto";
+import { sendEmail } from "../utils/emailHandler.js";
+
+const createAndSendEmailVerificationOtp = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+    const user = await User.findById(userId);
+    if (!user) {
+        throw new apiError(404, "User not found");
+    }
+    if (user.isVerified) {
+        throw new apiError(400, "User already verified");
+    }
+    if (
+        user.verifyOtpExpiry &&
+        Date.now() < user.verifyOtpExpiry
+    ) {
+        throw new apiError(
+            429,
+            "OTP already sent. Please wait."
+        );
+    }
+    const otp = crypto.randomInt(100000, 999999).toString();
+    const otpExpiry = new Date(Date.now() + 15 * 60 * 1000);
+
+    user.verifyOtp = otp;
+    user.verifyOtpExpiry = otpExpiry;
+    await user.save({ validateBeforeSave: false });
+
+    const message = `Hello!\n\nYour 6-digit verification code is: ${otp}\n\nThis code will expire in 15 minutes.`;
+
+    const options = {
+        email: user.email,
+        subject: "Email Verification",
+        message,
+    };
+
+    await sendEmail(options);
+
+    return res.status(200).json(
+        new apiResponse(
+            200,
+            {},
+            "OTP sent successfully"
+        )
+    );
+});
+
+const verifyEmailOtp = asyncHandler(async (req, res) => {
+    const { otp } = req.body;
+    if (!otp) {
+        throw new apiError(400, "OTP is required");
+    }
+    const user = await User.findById(req.user._id);
+    if (!user) {
+        throw new apiError(404, "User not found");
+    }
+    if (user.isVerified) {
+        throw new apiError(400, "User already verified");
+    }
+    if (
+        !(await user.isVerifyOtpCorrect(otp))
+        || (!user.verifyOtpExpiry ||
+            Date.now() > user.verifyOtpExpiry)) {
+        throw new apiError(400, "Invalid OTP");
+    }
+    user.isVerified = true;
+    user.verifyOtp = "";
+    user.verifyOtpExpiry = null;
+    await user.save({ validateBeforeSave: false });
+    return res.status(200).json(
+        new apiResponse(
+            200,
+            {},
+            "Email verified successfully",
+        )
+    );
+});
 
 
 
@@ -470,5 +673,9 @@ export {
     , updateProfilePic
     , deleteUser
     , getUserProfile
-
+    , changeGmail
+    , forgetPasswordGenerateOtp
+    , verifyResetPasswordOtp
+    , createAndSendEmailVerificationOtp
+    , verifyEmailOtp
 };

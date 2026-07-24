@@ -77,6 +77,16 @@ const userSchema = new mongoose.Schema(
             default: null
         },
 
+        resetPasswordOtp: {
+            type: String,
+            default: ""
+        },
+
+        resetPasswordOtpExpiry: {
+            type: Date,
+            default: null
+        },
+
     },
     {
         timestamps: true,
@@ -85,17 +95,33 @@ const userSchema = new mongoose.Schema(
 
 // Hash password before saving
 userSchema.pre("save", async function () {
-    if (!this.isModified("password")) {
-        return;
+    if (this.isModified("password")) {
+        this.password = await bcrypt.hash(this.password, 10);
     }
 
-    this.password = await bcrypt.hash(this.password, 10);
+    if (this.isModified("verifyOtp")) {
+        this.verifyOtp = await bcrypt.hash(this.verifyOtp, 10);
+    }
+
+    if (this.isModified("resetPasswordOtp")) {
+        this.resetPasswordOtp = await bcrypt.hash(this.resetPasswordOtp, 10);
+    }
 });
 
 // Compare entered password with hashed password
 userSchema.methods.isPasswordCorrect = async function (password) {
     return bcrypt.compare(password, this.password);
 };
+
+userSchema.methods.isVerifyOtpCorrect = async function (otp) {
+    return bcrypt.compare(otp, this.verifyOtp);
+}
+
+userSchema.methods.isResetPasswordOtpCorrect = async function (otp) {
+    return bcrypt.compare(otp, this.resetPasswordOtp);
+}
+
+
 
 // Generate Access Token
 userSchema.methods.generateAccessToken = function () {
