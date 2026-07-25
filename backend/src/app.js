@@ -3,7 +3,11 @@ import cookieParser from "cookie-parser"
 import { CORS_ORIGIN } from './constants.js';
 import cors from "cors"
 import router from "./routes/user.routes.js";
+import http from "http";
+import { Server } from "socket.io";
+
 const app = express();
+const server = http.createServer(app)
 
 app.use(cors({
     origin: CORS_ORIGIN,
