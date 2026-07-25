@@ -88,9 +88,47 @@ const markAllAsRead = asyncHandler(async (req, res) => {
     );
 });
 
+const deleteNotification = asyncHandler(async (req, res) => {
+    const { notificationId } = req.params;
+
+    const notification = await Notification.findOne({
+        _id: notificationId,
+        receiver: req.user._id
+    });
+
+    if (!notification) {
+        throw new apiError(404, "Notification not found");
+    }
+
+    if (!notification.isRead) {
+        const uKey = unreadKey(req.user._id);
+        const cKey = countKey(req.user._id);
+
+        const removedCount = await redisClient.lRem(uKey, 0, notificationId);
+
+        if (removedCount > 0) {
+            const currentCount = await redisClient.get(cKey);
+            if (currentCount && parseInt(currentCount) > 0) {
+                await redisClient.decr(cKey);
+            }
+        }
+    }
+
+    // Delete it permanently from MongoDB
+    await Notification.deleteOne({
+        _id: notificationId,
+        receiver: req.user._id
+    });
+
+    return res.status(200).json(
+        new apiResponse(200, {}, "Notification deleted successfully")
+    );
+});
+
 export {
     getUnreadCount,
     getNotifications,
     markAsRead,
-    markAllAsRead
+    markAllAsRead,
+    deleteNotification,
 };
