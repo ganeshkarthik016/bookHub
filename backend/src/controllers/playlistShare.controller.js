@@ -6,6 +6,7 @@ import { User } from "../models/user.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { apiError } from "../utils/apiError.js";
 import { apiResponse } from "../utils/apiResponse.js";
+import { sendNotification } from "../utils/sendNotification.js";
 
 //usefull function
 const isAuthorizedEditor = async (playlistId, userId) => {
@@ -69,11 +70,22 @@ const shareToUser = asyncHandler(async (req, res) => {
         user: targetUser._id,
         playlist: playlistId,
         role: finalRole
-    })
-        .populate(
-            "user",
-            "userName userFullName profilePic"
-        )
+    });
+
+    await member.populate(
+        "user",
+        "userName userFullName profilePic"
+    );
+
+    await sendNotification({
+        senderId: req.user._id,
+        receiverId: targetUser._id,
+        type: "PLAYLIST_SHARED",
+        title: "Playlist Shared",
+        message: `You were added as a ${finalRole} to a playlist`,
+        referenceId: playlistId
+    });
+
     return res.status(200).json(
         new apiResponse(
             201,
@@ -194,6 +206,15 @@ const updateMemberRole = asyncHandler(async (req, res) => {
         "userName userFullName profilePic"
     );
 
+    await sendNotification({
+        senderId: req.user._id,
+        receiverId: userId,
+        type: "PLAYLIST_ROLE_UPDATED",
+        title: "Role Updated",
+        message: `Your playlist role was updated to ${finalRole}`,
+        referenceId: playlistId
+    });
+
     return res.status(200).json(
         new apiResponse(
             200,
@@ -204,8 +225,7 @@ const updateMemberRole = asyncHandler(async (req, res) => {
 });
 
 const removeMember = asyncHandler(async (req, res) => {
-    const { playlistId } = req.params;
-    const { userId } = req.body;
+    const { playlistId, userId } = req.params;
     const playlist = await Playlist.findById(playlistId);
     if (!playlist) {
         throw new apiError(404, "Playlist not found");
@@ -230,6 +250,16 @@ const removeMember = asyncHandler(async (req, res) => {
     if (!member) {
         throw new apiError(404, "Member not found");
     }
+
+    await sendNotification({
+        senderId: req.user._id,
+        receiverId: targetUser._id,
+        type: "PLAYLIST_REMOVED",
+        title: "Removed from Playlist",
+        message: "You were removed from a playlist",
+        referenceId: playlistId
+    });
+
     return res.status(200).json(
         new apiResponse(
             200,
@@ -264,3 +294,13 @@ const leavePlaylist = asyncHandler(async (req, res) => {
         )
     )
 });
+
+export {
+    shareToUser,
+    getMembers,
+    getMyEditorPlaylists,
+    getMyViewerPlaylists,
+    updateMemberRole,
+    removeMember,
+    leavePlaylist
+}

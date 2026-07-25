@@ -6,6 +6,7 @@ import { apiResponse } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { apiError } from "../utils/apiError.js";
 import mongoose from "mongoose";
+import { sendNotification } from "../utils/sendNotification.js";
 
 
 const addComment = asyncHandler(async (req, res) => {
@@ -27,6 +28,17 @@ const addComment = asyncHandler(async (req, res) => {
         user: req.user._id,
         note: noteId,
     });
+
+    if (note.owner.toString() !== req.user._id.toString()) {
+        await sendNotification({
+            senderId: req.user._id,
+            receiverId: note.owner,
+            type: "COMMENT",
+            title: "New Comment",
+            message: "Someone commented on your note",
+            referenceId: noteId
+        });
+    }
 
     return res.status(201).json(
         new apiResponse(

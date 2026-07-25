@@ -4,6 +4,7 @@ import { User } from "../models/user.model.js";
 import { Follow } from "../models/follow.model.js";
 import { apiResponse } from "../utils/apiResponse.js";
 import mongoose from "mongoose";
+import { sendNotification } from "../utils/sendNotification.js";
 
 
 const toggleFollow = asyncHandler(async (req, res) => {
@@ -37,6 +38,16 @@ const toggleFollow = asyncHandler(async (req, res) => {
                 follower: req.user._id,
                 following: userId,
             });
+
+            await sendNotification({
+                senderId: req.user._id,
+                receiverId: userId,
+                type: "FOLLOW",
+                title: "New Follower",
+                message: "Someone started following you",
+                referenceId: req.user._id
+            });
+
             return res.status(200).json(
                 new apiResponse(
                     200,
@@ -48,7 +59,6 @@ const toggleFollow = asyncHandler(async (req, res) => {
             );
         }
     }
-
 });
 
 

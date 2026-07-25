@@ -4,6 +4,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { apiError } from "../utils/apiError.js";
 import { apiResponse } from "../utils/apiResponse.js";
 import { Follow } from "../models/follow.model.js";
+import { sendNotification } from "../utils/sendNotification.js";
 
 //push
 const toggleLike = asyncHandler(async (req, res) => {
@@ -46,6 +47,17 @@ const toggleLike = asyncHandler(async (req, res) => {
     note.likesCount += 1;
 
     await note.save({ validateBeforeSave: false });
+
+    if (note.owner.toString() !== req.user._id.toString()) {
+        await sendNotification({
+            senderId: req.user._id,
+            receiverId: note.owner,
+            type: "LIKE",
+            title: "New Like",
+            message: "Someone liked your note",
+            referenceId: noteId
+        });
+    }
 
     return res.status(200).json(
         new apiResponse(

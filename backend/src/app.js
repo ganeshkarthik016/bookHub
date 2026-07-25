@@ -59,6 +59,15 @@ import followRouter from './routes/follow.route.js'
 
 app.use("/api/v1/follows", followRouter)
 
+import playlistRouter from './routes/playlist.route.js'
+
+app.use("/api/v1/playlists", playlistRouter)
+
+import playlistShareRouter from './routes/playlistShare.route.js'
+
+app.use("/api/v1/playlistShares", playlistShareRouter)
+
+
 import notificationRouter from './routes/notification.route.js';
 
 app.use("/api/v1/notifications", notificationRouter);
