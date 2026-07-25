@@ -1,5 +1,3 @@
-import mongoose from "mongoose";
-
 const notificationSchema = new mongoose.Schema(
     {
         sender: {
@@ -11,7 +9,8 @@ const notificationSchema = new mongoose.Schema(
         receiver: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
-            required: true
+            required: true,
+            index: true
         },
 
         type: {
@@ -27,9 +26,17 @@ const notificationSchema = new mongoose.Schema(
             required: true
         },
 
-        title: String,
+        title: {
+            type: String,
+            required: true,
+            trim: true
+        },
 
-        message: String,
+        message: {
+            type: String,
+            required: true,
+            trim: true
+        },
 
         referenceId: {
             type: mongoose.Schema.Types.ObjectId
@@ -37,12 +44,18 @@ const notificationSchema = new mongoose.Schema(
 
         isRead: {
             type: Boolean,
-            default: false
+            default: false,
+            index: true
         }
     },
     {
         timestamps: true
-    });
+    }
+);
 
+notificationSchema.index({
+    receiver: 1,
+    createdAt: -1
+});
 
 export const Notification = mongoose.model("Notification", notificationSchema);
