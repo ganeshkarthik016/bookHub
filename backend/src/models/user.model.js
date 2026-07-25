@@ -67,26 +67,6 @@ const userSchema = new mongoose.Schema(
             default: false
         },
 
-        verifyOtp: {
-            type: String,
-            default: ""
-        },
-
-        verifyOtpExpiry: {
-            type: Date,
-            default: null
-        },
-
-        resetPasswordOtp: {
-            type: String,
-            default: ""
-        },
-
-        resetPasswordOtpExpiry: {
-            type: Date,
-            default: null
-        },
-
     },
     {
         timestamps: true,
@@ -99,13 +79,6 @@ userSchema.pre("save", async function () {
         this.password = await bcrypt.hash(this.password, 10);
     }
 
-    if (this.isModified("verifyOtp")) {
-        this.verifyOtp = await bcrypt.hash(this.verifyOtp, 10);
-    }
-
-    if (this.isModified("resetPasswordOtp")) {
-        this.resetPasswordOtp = await bcrypt.hash(this.resetPasswordOtp, 10);
-    }
 });
 
 // Compare entered password with hashed password
@@ -113,13 +86,6 @@ userSchema.methods.isPasswordCorrect = async function (password) {
     return bcrypt.compare(password, this.password);
 };
 
-userSchema.methods.isVerifyOtpCorrect = async function (otp) {
-    return bcrypt.compare(otp, this.verifyOtp);
-}
-
-userSchema.methods.isResetPasswordOtpCorrect = async function (otp) {
-    return bcrypt.compare(otp, this.resetPasswordOtp);
-}
 
 
 

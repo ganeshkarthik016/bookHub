@@ -11,6 +11,8 @@ import {
     cloudinary,
 } from "../utils/cloudinary.js";
 import mongoose from "mongoose";
+import { redisClient } from "../utils/redis.js";
+import bcrypt from "bcrypt";
 
 const registerUser = asyncHandler(async (req, res) => {
     const { userFullName, email, userName, password, bio } = req.body;
@@ -344,8 +346,6 @@ const changeGmail = asyncHandler(async (req, res) => {
     user.email = email.trim().toLowerCase();
     user.refreshToken = "";
     user.isVerified = false;
-    user.verifyOtp = "";
-    user.verifyOtpExpiry = null;
     await user.save({ validateBeforeSave: false });
     return res.status(200).json(
         new apiResponse(
@@ -365,10 +365,10 @@ const forgetPasswordGenerateOtp = asyncHandler(async (req, res) => {
     ) {
         throw new apiError(400, "Username or email is required");
     }
-    const user = await User.findone({
+    const user = await User.findOne({
         $or: [
-            { userName: userName.trim().toLowerCase() },
-            { email: email.trim().toLowerCase() },
+            { userName: userName?.trim().toLowerCase() },
+            { email: email?.trim().toLowerCase() },
         ],
     });
     if (!user) {
@@ -377,86 +377,71 @@ const forgetPasswordGenerateOtp = asyncHandler(async (req, res) => {
     if (!user.isVerified) {
         throw new apiError(400, "User email not verified");
     }
-    if (
-        user.resetPasswordOtpExpiry &&
-        Date.now() < user.resetPasswordOtpExpiry
-    ) {
-        throw new apiError(
-            429,
-            "OTP already sent. Please wait."
-        );
+
+    // Check Redis for an existing OTP to prevent spam
+    const redisKey = `reset_otp:${user.email}`;
+    const existingOtp = await redisClient.get(redisKey);
+    if (existingOtp) {
+        throw new apiError(429, "OTP already sent. Please wait.");
     }
 
     const otp = crypto.randomInt(100000, 999999).toString();
-    const otpExpiry = new Date(Date.now() + 15 * 60 * 1000);
+    const hashedOtp = await bcrypt.hash(otp, 10);
 
-    user.resetPasswordOtp = otp;
-    user.resetPasswordOtpExpiry = otpExpiry;
-    await user.save({ validateBeforeSave: false });
+    // Save to Redis with a 900-second (15-minute) TTL
+    await redisClient.setEx(redisKey, 900, hashedOtp);
 
     const message = `Hello!\n\nYour 6-digit password reset code is: ${otp}\n\nThis code will expire in 15 minutes.`;
 
-    const options = {
+    await sendEmail({
         email: user.email,
         subject: "Password Reset",
         message,
-    };
-
-    await sendEmail(options);
+    });
 
     return res.status(200).json(
-        new apiResponse(
-            200,
-            {},
-            "OTP sent successfully",
-        )
+        new apiResponse(200, {}, "OTP sent successfully")
     );
 });
 
 const verifyResetPasswordOtp = asyncHandler(async (req, res) => {
-    const { otp } = req.body;
-    const { newPassword, confirmPassword, email } = req.body;
+    const { otp, newPassword, confirmPassword, email } = req.body;
+
     if (!email || email?.trim() === "") {
         throw new apiError(400, "Email is required");
     }
-    if (!newPassword || !confirmPassword) {
-        throw new apiError(400, "New password and confirm password are required");
-    }
-    if (!otp) {
-        throw new apiError(400, "OTP is required");
-
+    if (!newPassword || !confirmPassword || !otp) {
+        throw new apiError(400, "OTP, New password, and confirm password are required");
     }
     if (newPassword !== confirmPassword) {
         throw new apiError(400, "Passwords do not match");
     }
-    const len = newPassword.length;
-    if (len < 8 || len > 64) {
+    if (newPassword.length < 8 || newPassword.length > 64) {
         throw new apiError(400, "Password must be between 8 and 64 characters");
     }
-    const user = await User.findone({
-        email: email.trim().toLowerCase(),
-    });
+
+    const user = await User.findOne({ email: email.trim().toLowerCase() });
     if (!user) {
         throw new apiError(404, "User not found");
     }
-    if (!(await user.isResetPasswordOtpCorrect(otp))
-        || (!user.resetPasswordOtpExpiry ||
-            Date.now() > user.resetPasswordOtpExpiry)) {
-        throw new apiError(400, "Invalid OTP");
-    }
-    user.password = newPassword;
-    user.refreshAccessToken = "";
-    user.resetPasswordOtp = "";
-    user.resetPasswordOtpExpiry = null;
-    await user.save({ validateBeforeSave: false });
-    return res.status(200).json(
-        new apiResponse(
-            200,
-            {},
-            "Password reset successfully",
-        )
-    );
 
+    // Fetch the hashed OTP from Redis
+    const redisKey = `reset_otp:${user.email}`;
+    const hashedOtp = await redisClient.get(redisKey);
+
+    if (!hashedOtp || !(await bcrypt.compare(otp, hashedOtp))) {
+        throw new apiError(400, "Invalid or expired OTP");
+    }
+
+    user.password = newPassword;
+    user.refreshToken = "";
+    await user.save({ validateBeforeSave: false });
+
+    await redisClient.del(redisKey);
+
+    return res.status(200).json(
+        new apiResponse(200, {}, "Password reset successfully")
+    );
 });
 
 //get controllers
@@ -585,46 +570,37 @@ import crypto from "crypto";
 import { sendEmail } from "../utils/emailHandler.js";
 
 const createAndSendEmailVerificationOtp = asyncHandler(async (req, res) => {
-    const userId = req.user._id;
-    const user = await User.findById(userId);
+    const user = await User.findById(req.user._id);
     if (!user) {
         throw new apiError(404, "User not found");
     }
     if (user.isVerified) {
         throw new apiError(400, "User already verified");
     }
-    if (
-        user.verifyOtpExpiry &&
-        Date.now() < user.verifyOtpExpiry
-    ) {
-        throw new apiError(
-            429,
-            "OTP already sent. Please wait."
-        );
-    }
-    const otp = crypto.randomInt(100000, 999999).toString();
-    const otpExpiry = new Date(Date.now() + 15 * 60 * 1000);
 
-    user.verifyOtp = otp;
-    user.verifyOtpExpiry = otpExpiry;
-    await user.save({ validateBeforeSave: false });
+    const redisKey = `verify_otp:${user._id}`;
+    const existingOtp = await redisClient.get(redisKey);
+
+    if (existingOtp) {
+        throw new apiError(429, "OTP already sent. Please wait.");
+    }
+
+    const otp = crypto.randomInt(100000, 999999).toString();
+    const hashedOtp = await bcrypt.hash(otp, 10);
+
+    // Save to Redis with a 900-second (15-minute) TTL
+    await redisClient.setEx(redisKey, 900, hashedOtp);
 
     const message = `Hello!\n\nYour 6-digit verification code is: ${otp}\n\nThis code will expire in 15 minutes.`;
 
-    const options = {
+    await sendEmail({
         email: user.email,
         subject: "Email Verification",
         message,
-    };
-
-    await sendEmail(options);
+    });
 
     return res.status(200).json(
-        new apiResponse(
-            200,
-            {},
-            "OTP sent successfully"
-        )
+        new apiResponse(200, {}, "OTP sent successfully")
     );
 });
 
@@ -633,6 +609,7 @@ const verifyEmailOtp = asyncHandler(async (req, res) => {
     if (!otp) {
         throw new apiError(400, "OTP is required");
     }
+
     const user = await User.findById(req.user._id);
     if (!user) {
         throw new apiError(404, "User not found");
@@ -640,22 +617,22 @@ const verifyEmailOtp = asyncHandler(async (req, res) => {
     if (user.isVerified) {
         throw new apiError(400, "User already verified");
     }
-    if (
-        !(await user.isVerifyOtpCorrect(otp))
-        || (!user.verifyOtpExpiry ||
-            Date.now() > user.verifyOtpExpiry)) {
-        throw new apiError(400, "Invalid OTP");
+
+    const redisKey = `verify_otp:${user._id}`;
+    const hashedOtp = await redisClient.get(redisKey);
+
+    if (!hashedOtp || !(await bcrypt.compare(otp, hashedOtp))) {
+        throw new apiError(400, "Invalid or expired OTP");
     }
+
     user.isVerified = true;
-    user.verifyOtp = "";
-    user.verifyOtpExpiry = null;
     await user.save({ validateBeforeSave: false });
+
+    // Delete the OTP from Redis upon successful verification
+    await redisClient.del(redisKey);
+
     return res.status(200).json(
-        new apiResponse(
-            200,
-            {},
-            "Email verified successfully",
-        )
+        new apiResponse(200, {}, "Email verified successfully")
     );
 });
 
