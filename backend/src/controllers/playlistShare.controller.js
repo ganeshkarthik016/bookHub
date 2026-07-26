@@ -100,6 +100,9 @@ const shareToUser = asyncHandler(async (req, res) => {
 const getMembers = asyncHandler(async (req, res) => {
     const { playlistId } = req.params;
     const playlist = await Playlist.findById(playlistId);
+    if (!playlist) {
+        throw new apiError(404, "Playlist not found");
+    }
     if (
         playlist.isPrivate &&
         playlist.owner.toString() !== req.user._id.toString() &&

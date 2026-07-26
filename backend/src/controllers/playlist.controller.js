@@ -118,7 +118,11 @@ const addToPlatlistToggel = asyncHandler(async (req, res) => {
 //get
 const getPlaylist = asyncHandler(async (req, res) => {
     const { playlistId } = req.params;
-    const playlist = await Playlist.findById(playlistId);
+    const playlist = await Playlist.findById(playlistId)
+        .populate(
+            "owner",
+            "userName userFullName profilePic"
+        );
 
     if (!playlist) {
         throw new apiError(404, "Playlist not found");
@@ -138,11 +142,7 @@ const getPlaylist = asyncHandler(async (req, res) => {
     return res.status(200).json(
         new apiResponse(
             200,
-            playlist
-                .populate(
-                    "owner",
-                    "userName userFullName profilePic"
-                ),
+            playlist,
             "Playlist fetched successfully"
         )
     );
