@@ -6,6 +6,7 @@ import {
     uploadOnCloudinary,
     cloudinary
 } from "../utils/cloudinary.js";
+import { User } from "../models/user.model.js";
 
 const uploadNotes = asyncHandler(async (req, res) => {
 
@@ -175,10 +176,13 @@ const updateNote = asyncHandler(async (req, res) => {
     }
 
     if (uploadedCover) {
-        if (uploadedCover && note.coverImage.publicId) {
-            await cloudinary.uploader.destroy(
-                note.coverImage.publicId
-            );
+        if (uploadedCover && note.coverImage?.publicId) {
+            try {
+                await cloudinary.uploader.destroy(note.coverImage.publicId);
+            } catch (error) {
+                throw new apiError(500, "Failed to delete old cover image");
+                // Continue - don't block the update
+            }
         }
 
         note.coverImage.url = uploadedCover.secure_url;
@@ -462,15 +466,23 @@ const deleteNote = asyncHandler(async (req, res) => {
         throw new apiError(403, "You are not authorized to delete this note")
     }
     if (note.pdf.publicId) {
-        await cloudinary.uploader.destroy(
-            note.pdf.publicId
-        );
+        try {
+            await cloudinary.uploader.destroy(
+                note.pdf.publicId
+            );
+        } catch (error) {
+            throw new apiError(500, "Failed to delete old pdf")
+        }
     }
 
     if (note.coverImage.publicId) {
-        await cloudinary.uploader.destroy(
-            note.coverImage.publicId
-        );
+        try {
+            await cloudinary.uploader.destroy(
+                note.coverImage.publicId
+            );
+        } catch {
+            throw new apiError(500, "Failed to delete old cover image")
+        }
     }
     await note.deleteOne();
     return res.status(200).json(

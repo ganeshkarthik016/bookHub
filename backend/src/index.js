@@ -4,10 +4,13 @@ import { app } from "./app.js";
 import { PORT } from "./constants.js";
 import http from "http";
 import { Server } from "socket.io";
+import { connectRedis } from "./utils/redis.js";
 
 dotenv.config({
     path: './.env'
 })
+await connectRedis();
+
 const port = PORT;
 
 connectDB()

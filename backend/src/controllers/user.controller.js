@@ -312,9 +312,13 @@ const updateProfilePic = asyncHandler(async (req, res) => {
         user.profilePic.publicId &&
         user.profilePic.url !== DEFAULT_PROFILE_PIC
     ) {
-        await cloudinary.uploader.destroy(
-            user.profilePic.publicId
-        );
+        try {
+            await cloudinary.uploader.destroy(
+                user.profilePic.publicId
+            );
+        } catch {
+            throw new apiError(500, "Failed to delete old profile pic")
+        }
     }
 
     // Update user's profile picture
@@ -539,9 +543,13 @@ const deleteUser = asyncHandler(async (req, res) => {
         user.profilePic.publicId &&
         user.profilePic.url !== DEFAULT_PROFILE_PIC
     ) {
-        await cloudinary.uploader.destroy(
-            user.profilePic.publicId
-        );
+        try {
+            await cloudinary.uploader.destroy(
+                user.profilePic.publicId
+            );
+        } catch {
+            throw new apiError(500, "Failed to delete old profile pic")
+        }
     }
     user.refreshToken = "";
     await user.save({ validateBeforeSave: false });
