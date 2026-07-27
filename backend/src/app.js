@@ -68,7 +68,7 @@ import playlistShareRouter from './routes/playlistShare.route.js'
 app.use("/api/v1/playlistShares", playlistShareRouter)
 
 
-import notificationRouter from './routes/notification.route.js';
+import notificationRouter from './routes/notifications.route.js';
 
 app.use("/api/v1/notifications", notificationRouter);
 

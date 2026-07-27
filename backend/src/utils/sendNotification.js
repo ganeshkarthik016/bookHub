@@ -1,4 +1,4 @@
-import { Notification } from "../models/notification.model.js";
+import { Notification } from "../models/notifications.model.js";
 import { redisClient, unreadKey, countKey } from "./redis.js";
 import { io } from "../app.js";
 import { User } from "../models/user.model.js";

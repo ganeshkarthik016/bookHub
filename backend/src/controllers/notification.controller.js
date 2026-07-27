@@ -1,4 +1,4 @@
-import { Notification } from "../models/notification.model.js";
+import { Notification } from "../models/notifications.model.js";
 import { redisClient, countKey, unreadKey } from "../utils/redis.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { apiError } from "../utils/apiError.js";
