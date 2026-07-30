@@ -17,9 +17,9 @@ router.route("/count").get(getUnreadCount);
 
 router.route("/").get(getNotifications);
 
-router.route("/read-all").patch(interactionLimiter, arkAllAsRead);
+router.route("/read-all").patch(interactionLimiter, markAllAsRead);
 
-router.route("/:notificationId/read").patch(interactionLimiter, arkAsRead);
+router.route("/:notificationId/read").patch(interactionLimiter, markAsRead);
 
 router.route("/:notificationId").delete(interactionLimiter, deleteNotification);
 

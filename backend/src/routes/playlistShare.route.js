@@ -26,7 +26,7 @@ router.route("/:playlistId/members")
 
 router.route("/:playlistId/members/:userId")
     .patch(interactionLimiter, updateMemberRole)
-    .delete(interactionLimiter, emoveMember);
+    .delete(interactionLimiter, removeMember);
 
 
 // Route to leave a playlist
