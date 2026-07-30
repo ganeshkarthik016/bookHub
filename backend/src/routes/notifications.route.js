@@ -1,5 +1,6 @@
 import { Router } from "express";
-import { verifyJWT } from "../middlewares/auth.middleware.js"; // Adjust path as needed
+import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { interactionLimiter } from "../middlewares/rateLimit.middleware.js";
 import {
     getUnreadCount,
     getNotifications,
@@ -16,10 +17,10 @@ router.route("/count").get(getUnreadCount);
 
 router.route("/").get(getNotifications);
 
-router.route("/read-all").patch(markAllAsRead);
+router.route("/read-all").patch(interactionLimiter, arkAllAsRead);
 
-router.route("/:notificationId/read").patch(markAsRead);
+router.route("/:notificationId/read").patch(interactionLimiter, arkAsRead);
 
-router.route("/:notificationId").delete(deleteNotification);
+router.route("/:notificationId").delete(interactionLimiter, deleteNotification);
 
 export default router;

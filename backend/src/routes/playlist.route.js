@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { interactionLimiter } from "../middlewares/rateLimit.middleware.js";
 import {
     createPlaylist,
     addToPlatlistToggel,
@@ -18,21 +19,25 @@ import {
 const router = Router();
 //post
 router.route("/create").post(
+    interactionLimiter,
     verifyJWT,
     createPlaylist
 );
 
 router.route("/add-to-playlist/:playlistId").post(
+    interactionLimiter,
     verifyJWT,
     addToPlatlistToggel
 );
 //patch
 router.route("/edit-playlist/:playlistId").patch(
+    interactionLimiter,
     verifyJWT,
     editPlaylist
 );
 
 router.route("/edit-playlist-item-order/:playlistId").patch(
+    interactionLimiter,
     verifyJWT,
     editPlaylistItemOrder
 );
@@ -69,6 +74,7 @@ router.route("/is-note-present-in-playlist/:playlistId").get(
 
 //delete
 router.route("/delete-playlist/:playlistId").delete(
+    interactionLimiter,
     verifyJWT,
     deletePlaylist
 );

@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { interactionLimiter } from "../middlewares/rateLimit.middleware.js";
 import {
     toggleFollow,
     isFollowing,
@@ -13,6 +14,7 @@ import {
 const router = Router();
 
 router.route("/toggle/:userId").post(
+    interactionLimiter,
     verifyJWT,
     toggleFollow
 );//done testing

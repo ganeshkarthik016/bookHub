@@ -11,12 +11,14 @@ import {
     downloadNote,
 } from "../controllers/note.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { uploadLimiter } from "../middlewares/rateLimit.middleware.js";
 import { uploadNoteFiles } from "../middlewares/multer.middleware.js";
 
 const router = Router();
 //post
 router.route("/upload-notes").post(
     verifyJWT,
+    uploadLimiter,
     uploadNoteFiles.fields([
         {
             name: "pdf",
@@ -33,6 +35,7 @@ router.route("/upload-notes").post(
 //patch
 router.route("/update-note-details/:noteId").patch(
     verifyJWT,
+    uploadLimiter,
     updateNoteDetails
 );
 

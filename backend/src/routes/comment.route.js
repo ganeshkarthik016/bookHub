@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { interactionLimiter } from "../middlewares/rateLimit.middleware.js";
 import {
     addComment,
     getNoteComments,
@@ -11,6 +12,7 @@ import {
 const router = Router();
 
 router.route("/add-comment/:noteId").post(
+    interactionLimiter,
     verifyJWT,
     addComment
 );
@@ -21,11 +23,13 @@ router.route("/get-comments/:noteId").get(
 );
 
 router.route("/edit-comment/:commentId").patch(
+    interactionLimiter,
     verifyJWT,
     editMyComment
 );
 
 router.route("/delete-comment/:commentId").delete(
+    interactionLimiter,
     verifyJWT,
     deleteMyComment
 );

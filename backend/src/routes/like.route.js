@@ -7,10 +7,12 @@ import {
 } from "../controllers/like.controller.js";
 
 import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { interactionLimiter } from "../middlewares/rateLimit.middleware.js";
 
 const router = Router();
 
 router.route("/toggle/:noteId").post(
+    interactionLimiter,
     verifyJWT,
     toggleLike
 );//tested

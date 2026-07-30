@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { interactionLimiter } from "../middlewares/rateLimit.middleware.js";
 import {
     shareToUser,
     getMembers,
@@ -24,11 +25,11 @@ router.route("/:playlistId/members")
     .get(getMembers);
 
 router.route("/:playlistId/members/:userId")
-    .patch(updateMemberRole)
-    .delete(removeMember);
+    .patch(interactionLimiter, updateMemberRole)
+    .delete(interactionLimiter, emoveMember);
 
 
 // Route to leave a playlist
-router.route("/:playlistId/leave").delete(leavePlaylist);
+router.route("/:playlistId/leave").delete(interactionLimiter, leavePlaylist);
 
 export default router;
