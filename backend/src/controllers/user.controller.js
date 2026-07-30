@@ -2,6 +2,13 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { apiError } from "../utils/apiError.js";
 import { User } from "../models/user.model.js";
 import { Follow } from "../models/follow.model.js";
+import { Note } from "../models/note.model.js";
+import { Playlist } from "../models/playlist.model.js";
+import { Comment } from "../models/comment.model.js";
+import { Like } from "../models/like.model.js";
+import { Notification } from "../models/notifications.model.js";
+import { PlaylistMember } from "../models/playlistMember.model.js";
+import { PlaylistItem } from "../models/playlistItem.model.js";
 import { apiResponse } from "../utils/apiResponse.js";
 import jwt from "jsonwebtoken";
 import { REFRESH_TOKEN_SECRET } from "../constants.js";
@@ -528,32 +535,83 @@ const getUserProfile = asyncHandler(async (req, res) => {
 const deleteUser = asyncHandler(async (req, res) => {
     const password = req.body.password;
     if (!password) {
-        throw new apiError(400, "Password is required")
+        throw new apiError(400, "Password is required");
     }
+
     const user = await User.findById(req.user._id);
     if (!user) {
-        throw new apiError(404, "User not found")
+        throw new apiError(404, "User not found");
     }
-    const isPasswordCorrect =
-        await user.isPasswordCorrect(password);
+
+    const isPasswordCorrect = await user.isPasswordCorrect(password);
     if (!isPasswordCorrect) {
-        throw new apiError(401, "Invalid credentials")
+        throw new apiError(401, "Invalid credentials");
     }
+
+    // 1. Delete User's Profile Picture from Cloudinary
     if (
         user.profilePic.publicId &&
         user.profilePic.url !== DEFAULT_PROFILE_PIC
     ) {
         try {
-            await cloudinary.uploader.destroy(
-                user.profilePic.publicId
-            );
+            await cloudinary.uploader.destroy(user.profilePic.publicId);
         } catch {
-            throw new apiError(500, "Failed to delete old profile pic")
+            throw new apiError(500, "Failed to delete old profile pic");
         }
     }
+
+    const userId = req.user._id;
+
+    // 2. Find all Notes and Playlists owned by the user to clean up their dependencies
+    const userNotes = await Note.find({ owner: userId });
+    const noteIds = userNotes.map(note => note._id);
+
+    const userPlaylists = await Playlist.find({ owner: userId });
+    const playlistIds = userPlaylists.map(playlist => playlist._id);
+
+    // 3. Delete Cloudinary files for all of the User's Notes
+    for (const note of userNotes) {
+        try {
+            if (note.pdf?.publicId) {
+                await cloudinary.uploader.destroy(note.pdf.publicId);
+            }
+            if (note.coverImage?.publicId) {
+                await cloudinary.uploader.destroy(note.coverImage.publicId);
+            }
+        } catch (error) {
+            console.error("Failed to delete note files from Cloudinary:", error);
+        }
+    }
+
+    // 4. Massive Parallel Cleanup of the Database
+    await Promise.all([
+        // Clean up direct user actions across all collections
+        Comment.deleteMany({ user: userId }),
+        Like.deleteMany({ user: userId }),
+        Follow.deleteMany({ $or: [{ follower: userId }, { following: userId }] }),
+        Notification.deleteMany({ $or: [{ sender: userId }, { receiver: userId }] }),
+        PlaylistMember.deleteMany({ user: userId }),
+
+        // Clean up everything attached to the Notes this user is deleting
+        Comment.deleteMany({ note: { $in: noteIds } }),
+        Like.deleteMany({ note: { $in: noteIds } }),
+        PlaylistItem.deleteMany({ note: { $in: noteIds } }),
+
+        // Clean up everything attached to the Playlists this user is deleting
+        PlaylistItem.deleteMany({ playlist: { $in: playlistIds } }),
+        PlaylistMember.deleteMany({ playlist: { $in: playlistIds } }),
+
+        // Finally, delete the actual Notes and Playlists themselves
+        Note.deleteMany({ owner: userId }),
+        Playlist.deleteMany({ owner: userId }),
+    ]);
+
+    // 5. Delete the User Document
     user.refreshToken = "";
     await user.save({ validateBeforeSave: false });
     await user.deleteOne();
+
+    // 6. Clear Cookies and Respond
     const options = {
         httpOnly: true,
         secure: true,
@@ -565,12 +623,11 @@ const deleteUser = asyncHandler(async (req, res) => {
         .json(
             new apiResponse(
                 200,
-                { message: "User deleted successfully" },
-                "User deleted successfully"
+                { message: "User and all associated data deleted successfully" },
+                "User and all associated data deleted successfully"
             )
-        )
-
-})
+        );
+});
 
 // to verify email
 

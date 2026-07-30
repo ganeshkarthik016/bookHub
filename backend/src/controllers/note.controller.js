@@ -1,4 +1,8 @@
 import { Note } from "../models/note.model.js";
+import { Like } from "../models/like.model.js";
+import { Comment } from "../models/comment.model.js";
+import { PlaylistItem } from "../models/playlistItem.model.js";
+import { Notification } from "../models/notifications.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { apiError } from "../utils/apiError.js";
 import { apiResponse } from "../utils/apiResponse.js";
@@ -458,41 +462,51 @@ const downloadNote = asyncHandler(async (req, res) => {
 //delete
 const deleteNote = asyncHandler(async (req, res) => {
     const { noteId } = req.params;
+
     const note = await Note.findById(noteId);
     if (!note) {
         throw new apiError(404, "Note not found");
     }
+
     if (req.user._id.toString() !== note.owner.toString()) {
-        throw new apiError(403, "You are not authorized to delete this note")
+        throw new apiError(403, "You are not authorized to delete this note");
     }
-    if (note.pdf.publicId) {
+
+    // Scrub the PDF from Cloudinary
+    if (note.pdf?.publicId) {
         try {
-            await cloudinary.uploader.destroy(
-                note.pdf.publicId
-            );
+            await cloudinary.uploader.destroy(note.pdf.publicId);
         } catch (error) {
-            throw new apiError(500, "Failed to delete old pdf")
+            throw new apiError(500, "Failed to delete old pdf");
         }
     }
 
-    if (note.coverImage.publicId) {
+    // Scrub the Cover Image from Cloudinary
+    if (note.coverImage?.publicId) {
         try {
-            await cloudinary.uploader.destroy(
-                note.coverImage.publicId
-            );
+            await cloudinary.uploader.destroy(note.coverImage.publicId);
         } catch {
-            throw new apiError(500, "Failed to delete old cover image")
+            throw new apiError(500, "Failed to delete old cover image");
         }
     }
+
+    // Massive Parallel Cleanup for the Database
+    await Promise.all([
+        Comment.deleteMany({ note: noteId }),
+        Like.deleteMany({ note: noteId }),
+        PlaylistItem.deleteMany({ note: noteId })
+    ]);
+
+    // Finally, delete the actual Note document
     await note.deleteOne();
+
     return res.status(200).json(
         new apiResponse(
             200,
-            { message: "Note deleted successfully" },
-            "Note deleted successfully"
+            { message: "Note and all associated data deleted successfully" },
+            "Note and all associated data deleted successfully"
         )
-    )
-
+    );
 });
 
 
