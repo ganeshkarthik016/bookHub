@@ -3,6 +3,9 @@ import cookieParser from "cookie-parser"
 import { CORS_ORIGIN } from './constants.js';
 import cors from "cors"
 import http from "http";
+import helmet from "helmet";
+import compression from "compression";
+import morgan from "morgan";
 import { Server } from "socket.io";
 
 const app = express();
@@ -22,6 +25,9 @@ app.use(cors({
     credentials: true
 }))
 
+app.use(helmet());
+app.use(compression());
+app.use(morgan("dev"));
 app.use(express.json({ limit: "16kb" }))
 app.use(express.urlencoded({ extended: true, limit: "16kb" }))
 app.use(express.static("public"))
@@ -72,6 +78,12 @@ app.use("/api/v1/playlistShares", playlistShareRouter)
 import notificationRouter from './routes/notifications.route.js';
 
 app.use("/api/v1/notifications", notificationRouter);
+
+app.get("/health", (req, res) => {
+    res.json({
+        status: "ok"
+    });
+});
 
 
 app.use((err, req, res, next) => {
