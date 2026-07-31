@@ -16,6 +16,8 @@ const router = Router();
 // Apply auth middleware to all routes in this file
 router.use(verifyJWT);
 
+router.route("/:playlistId/share").post(interactionLimiter, shareToUser);
+
 // Routes for fetching a user's shared playlists
 router.route("/editor").get(getMyEditorPlaylists);
 router.route("/viewer").get(getMyViewerPlaylists);
