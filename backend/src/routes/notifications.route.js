@@ -3,6 +3,7 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { interactionLimiter } from "../middlewares/rateLimit.middleware.js";
 import {
     getUnreadCount,
+    getUnreadNotifications,
     getNotifications,
     markAsRead,
     markAllAsRead,
@@ -14,6 +15,8 @@ const router = Router();
 router.use(verifyJWT);
 
 router.route("/count").get(getUnreadCount);
+
+router.route("/unread").get(getUnreadNotifications);
 
 router.route("/").get(getNotifications);
 

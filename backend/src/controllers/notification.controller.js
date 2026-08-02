@@ -15,6 +15,32 @@ const getUnreadCount = asyncHandler(async (req, res) => {
     );
 });
 
+const getUnreadNotifications = asyncHandler(async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+
+    const unreadNotifications = await Notification.find({ 
+        receiver: req.user._id, 
+        isRead: false 
+    })
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .lean()
+        .populate(
+            "sender",
+            "userName userFullName profilePic"
+        );
+
+    return res.status(200).json(
+        new apiResponse(
+            200, 
+            unreadNotifications, 
+            "Unread notifications fetched successfully"
+        )
+    );
+});
+
 const getNotifications = asyncHandler(async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
@@ -127,6 +153,7 @@ const deleteNotification = asyncHandler(async (req, res) => {
 
 export {
     getUnreadCount,
+    getUnreadNotifications,
     getNotifications,
     markAsRead,
     markAllAsRead,
