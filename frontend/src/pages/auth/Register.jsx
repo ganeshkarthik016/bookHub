@@ -189,6 +189,16 @@ function Register() {
                         {errorMessage}
                     </p>
                 )}
+                <p className="text-sm text-center text-gray-600">
+    Already have an account?{" "}
+    <button
+        type="button"
+        onClick={() => navigate("/login")}
+        className="text-black font-medium hover:underline"
+    >
+        Login
+    </button>
+</p>
 
                 <button
                     type="submit"
