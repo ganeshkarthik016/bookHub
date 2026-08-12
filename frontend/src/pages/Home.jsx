@@ -1,15 +1,13 @@
-import Navbar from "../components/layout/Navbar";
-
 function Home() {
     return (
         <div>
-            <Navbar />
+            <h1 className="text-3xl font-bold">
+                Welcome to BookHub
+            </h1>
 
-            <main className="p-6">
-                <h1 className="text-3xl font-bold">
-                    Welcome to BookHub
-                </h1>
-            </main>
+            <p className="mt-2 text-gray-600">
+                Your study material, notes and playlists in one place.
+            </p>
         </div>
     );
 }

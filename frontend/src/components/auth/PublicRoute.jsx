@@ -1,7 +1,7 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-function PublicRoute({ children }) {
+function PublicRoute() {
     const { isAuthenticated, authChecked } = useSelector(
         (state) => state.auth
     );
@@ -18,7 +18,7 @@ function PublicRoute({ children }) {
         return <Navigate to="/" replace />;
     }
 
-    return children;
+    return <Outlet />;
 }
 
 export default PublicRoute;
