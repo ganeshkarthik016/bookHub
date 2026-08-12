@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import Home from "./pages/Home";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 import { getCurrentUser } from "./services/auth.service";
 import {
@@ -46,7 +47,9 @@ function App() {
             <Routes>
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-                <Route path="/" element={<Home />} />
+                <Route element={<ProtectedRoute />}>
+                   <Route path="/" element={<Home />} />
+                </Route>
             </Routes>
         </BrowserRouter>
     );
