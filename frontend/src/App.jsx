@@ -6,6 +6,7 @@ import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import Home from "./pages/Home";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import PublicRoute from "./components/auth/PublicRoute";
 
 import { getCurrentUser } from "./services/auth.service";
 import {
@@ -42,17 +43,38 @@ function App() {
         );
     }
 
-    return (
-        <BrowserRouter>
-            <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route element={<ProtectedRoute />}>
-                   <Route path="/" element={<Home />} />
-                </Route>
-            </Routes>
-        </BrowserRouter>
-    );
+            return (
+            <BrowserRouter>
+                <Routes>
+                    <Route
+                        path="/login"
+                        element={
+                            <PublicRoute>
+                                <Login />
+                            </PublicRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/register"
+                        element={
+                            <PublicRoute>
+                                <Register />
+                            </PublicRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/"
+                        element={
+                            <ProtectedRoute>
+                                <Home />
+                            </ProtectedRoute>
+                        }
+                    />
+                </Routes>
+            </BrowserRouter>
+        );
 }
 
 export default App;
