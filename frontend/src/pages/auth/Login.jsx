@@ -11,8 +11,8 @@ import {
 import { loginUser } from "../../services/auth.service";
 
 function Login() {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+    const [identifier, setIdentifier] = useState("");
+const [password, setPassword] = useState("");
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -20,27 +20,27 @@ function Login() {
     const loading = useSelector((state) => state.auth.loading);
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
+    e.preventDefault();
 
-        dispatch(loginStart());
+    dispatch(loginStart());
 
-        try {
-            const response = await loginUser({
-                email,
-                password,
-            });
+    try {
+const response = await loginUser({
+    identifier,
+    password,
+});
 
-            dispatch(loginSuccess(response.data));
+        dispatch(loginSuccess(response.data));
 
-            navigate("/");
-        } catch (error) {
-            dispatch(loginFailure());
+        navigate("/");
+    } catch (error) {
+        dispatch(loginFailure());
 
-            console.error(
-                error.response?.data?.message || "Login failed"
-            );
-        }
-    };
+        console.error(
+            error.response?.data?.message || "Login failed"
+        );
+    }
+};
 
     return (
         <div className="min-h-screen flex items-center justify-center">
@@ -53,10 +53,10 @@ function Login() {
                 </h1>
 
                 <input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    type="text"
+                    placeholder="Username or Email"
+                    value={identifier}
+                    onChange={(e) => setIdentifier(e.target.value)}
                     className="w-full border p-3 rounded"
                     required
                 />
