@@ -12,7 +12,9 @@ import { loginUser } from "../../services/auth.service";
 
 function Login() {
     const [identifier, setIdentifier] = useState("");
-const [password, setPassword] = useState("");
+    const [password, setPassword] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -20,27 +22,35 @@ const [password, setPassword] = useState("");
     const loading = useSelector((state) => state.auth.loading);
 
     const handleSubmit = async (e) => {
-    e.preventDefault();
+        e.preventDefault();
 
-    dispatch(loginStart());
+        setErrorMessage("");
+        setSuccessMessage("");
 
-    try {
-const response = await loginUser({
-    identifier,
-    password,
-});
+        dispatch(loginStart());
 
-        dispatch(loginSuccess(response.data));
+        try {
+            const response = await loginUser({
+                identifier,
+                password,
+            });
 
-        navigate("/");
-    } catch (error) {
-        dispatch(loginFailure());
+            dispatch(loginSuccess(response.data));
 
-        console.error(
-            error.response?.data?.message || "Login failed"
-        );
-    }
-};
+            setSuccessMessage("Login successful!");
+
+            setTimeout(() => {
+                navigate("/");
+            }, 500);
+        } catch (error) {
+            dispatch(loginFailure());
+
+            setErrorMessage(
+                error.response?.data?.message ||
+                "Login failed. Please check your credentials and try again."
+            );
+        }
+    };
 
     return (
         <div className="min-h-screen flex items-center justify-center">
@@ -70,13 +80,35 @@ const response = await loginUser({
                     required
                 />
 
+                {successMessage && (
+                    <p className="text-green-600 text-sm">
+                        {successMessage}
+                    </p>
+                )}
+
+                {errorMessage && (
+                    <p className="text-red-500 text-sm">
+                        {errorMessage}
+                    </p>
+                )}
+
                 <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-black text-white p-3 rounded"
+                    className="w-full bg-black text-white p-3 rounded disabled:opacity-50"
                 >
                     {loading ? "Logging in..." : "Login"}
                 </button>
+                <p className="text-sm text-center text-gray-600">
+    Don't have an account?{" "}
+    <button
+        type="button"
+        onClick={() => navigate("/register")}
+        className="text-black font-medium hover:underline"
+    >
+        Register
+    </button>
+</p>
             </form>
         </div>
     );
