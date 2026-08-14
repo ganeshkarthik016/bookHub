@@ -42,8 +42,10 @@ function Sidebar() {
 
                 <button
                     type="button"
-                    onClick={() => setCollapsed(!collapsed)}
-                    className="rounded-md px-2 py-1 text-lg hover:bg-gray-100"
+                    onClick={() =>
+                        setCollapsed(!collapsed)
+                    }
+                    className="rounded-md px-2 py-1 text-xl hover:bg-gray-100"
                 >
                     ☰
                 </button>
@@ -54,6 +56,11 @@ function Sidebar() {
                     <NavLink
                         key={link.path}
                         to={link.path}
+                        title={
+                            collapsed
+                                ? link.name
+                                : undefined
+                        }
                         className={({ isActive }) =>
                             `flex items-center rounded-lg px-3 py-2.5 ${
                                 collapsed
@@ -65,7 +72,6 @@ function Sidebar() {
                                     : 'text-gray-700 hover:bg-gray-100'
                             }`
                         }
-                        title={collapsed ? link.name : undefined}
                     >
                         <span>{link.icon}</span>
 

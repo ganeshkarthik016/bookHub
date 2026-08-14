@@ -1,18 +1,13 @@
 import { useEffect } from "react";
-import {
-    BrowserRouter,
-    Routes,
-    Route,
-} from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import Home from "./pages/Home";
 
-import PublicRoute from "./components/auth/PublicRoute";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
-import MainLayout from "./components/layout/MainLayout";
+import PublicRoute from "./components/auth/PublicRoute";
 
 import { getCurrentUser } from "./services/auth.service";
 import {
@@ -32,7 +27,9 @@ function App() {
             try {
                 const response = await getCurrentUser();
 
-                dispatch(restoreUser(response.data.user));
+                dispatch(
+                    restoreUser(response.data.user)
+                );
             } catch (error) {
                 dispatch(loginFailure());
             }
@@ -52,28 +49,32 @@ function App() {
     return (
         <BrowserRouter>
             <Routes>
-                {/* Public routes */}
-                <Route element={<PublicRoute />}>
-                    <Route
-                        path="/login"
-                        element={<Login />}
-                    />
+                <Route
+                    path="/login"
+                    element={
+                        <PublicRoute>
+                            <Login />
+                        </PublicRoute>
+                    }
+                />
 
-                    <Route
-                        path="/register"
-                        element={<Register />}
-                    />
-                </Route>
+                <Route
+                    path="/register"
+                    element={
+                        <PublicRoute>
+                            <Register />
+                        </PublicRoute>
+                    }
+                />
 
-                {/* Protected routes */}
-                <Route element={<ProtectedRoute />}>
-                    <Route element={<MainLayout />}>
-                        <Route
-                            path="/"
-                            element={<Home />}
-                        />
-                    </Route>
-                </Route>
+                <Route
+                    path="/"
+                    element={
+                        <ProtectedRoute>
+                            <Home />
+                        </ProtectedRoute>
+                    }
+                />
             </Routes>
         </BrowserRouter>
     );

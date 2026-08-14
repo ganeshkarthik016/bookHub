@@ -46,7 +46,6 @@ const getNotifications = asyncHandler(async (req, res) => {
     const limit = parseInt(req.query.limit) || 20;
 
     const notifications = await Notification.find({ receiver: req.user._id })
-        .populate("sender", "userName profilePic")
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
         .limit(limit)
