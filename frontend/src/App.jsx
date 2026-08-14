@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import Home from "./pages/Home";
+import MainLayout from "./components/layout/MainLayout.jsx";
 
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import PublicRoute from "./components/auth/PublicRoute";
@@ -67,14 +68,18 @@ function App() {
                     }
                 />
 
+                {/* Wrap MainLayout with ProtectedRoute, and nest your pages inside */}
                 <Route
                     path="/"
                     element={
                         <ProtectedRoute>
-                            <Home />
+                            <MainLayout />
                         </ProtectedRoute>
                     }
-                />
+                >
+                    <Route index element={<Home />} />
+                    {/* Future routes like <Route path="notes" element={<Notes />} /> will go here */}
+                </Route>
             </Routes>
         </BrowserRouter>
     );
