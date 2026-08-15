@@ -49,7 +49,7 @@ function Register() {
 
             const response = await registerUser(formData);
 
-            dispatch(loginSuccess(response.data.user));
+            dispatch(loginSuccess(response.data));
 
             setMessage("Account created successfully!");
 
@@ -125,9 +125,9 @@ function Register() {
                     {...register("password", {
                         required: "Password is required",
                         minLength: {
-                            value: 6,
+                            value: 8,
                             message:
-                                "Password must be at least 6 characters",
+                                "Password must be at least 8 characters",
                         },
                     })}
                     className="w-full border p-3 rounded"

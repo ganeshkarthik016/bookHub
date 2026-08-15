@@ -1,0 +1,17 @@
+import { useEffect, useState } from "react";
+import { createPlaylist, deletePlaylist, getMyPlaylists, updatePlaylist } from "../services/playlist.service";
+
+function Playlists() {
+    const [playlists, setPlaylists] = useState([]); const [name, setName] = useState(""); const [isPrivate, setPrivate] = useState(false); const [loading, setLoading] = useState(true); const [error, setError] = useState("");
+    useEffect(() => {
+        getMyPlaylists()
+            .then((response) => setPlaylists(response.data.data))
+            .catch((err) => setError(err.response?.data?.message || "Could not load playlists."))
+            .finally(() => setLoading(false));
+    }, []);
+    const create = async (event) => { event.preventDefault(); if (!name.trim()) return; try { const response = await createPlaylist({ name, isPrivate }); setPlaylists((items) => [response.data.data, ...items]); setName(""); setPrivate(false); } catch (err) { setError(err.response?.data?.message || "Could not create playlist."); } };
+    const togglePrivacy = async (playlist) => { try { const response = await updatePlaylist(playlist._id, { isPrivate: !playlist.isPrivate }); setPlaylists((items) => items.map((item) => item._id === playlist._id ? response.data.data : item)); } catch (err) { setError(err.response?.data?.message || "Could not update playlist."); } };
+    const remove = async (id) => { if (!window.confirm("Delete this playlist?")) return; try { await deletePlaylist(id); setPlaylists((items) => items.filter((item) => item._id !== id)); } catch (err) { setError(err.response?.data?.message || "Could not delete playlist."); } };
+    return <div className="mx-auto max-w-5xl"><div className="mb-6"><h1 className="text-2xl font-bold">Playlists</h1><p className="mt-1 text-sm text-slate-500">Group notes into collections you control.</p></div><form onSubmit={create} className="mb-8 flex flex-wrap items-center gap-3 border-y border-slate-200 py-4"><input value={name} onChange={(event) => setName(event.target.value)} maxLength="50" placeholder="New playlist name" className="min-w-56 flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm" /><label className="flex items-center gap-2 text-sm text-slate-600"><input type="checkbox" checked={isPrivate} onChange={(event) => setPrivate(event.target.checked)} /> Private</label><button className="rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white">Create playlist</button></form>{error && <p className="mb-4 text-sm text-rose-700">{error}</p>}{loading ? <p className="text-sm text-slate-500">Loading playlists…</p> : playlists.length === 0 ? <p className="border-y border-slate-200 py-10 text-sm text-slate-500">No playlists yet.</p> : <div className="divide-y divide-slate-200 border-y border-slate-200">{playlists.map((playlist) => <article key={playlist._id} className="flex flex-wrap items-center gap-3 py-4"><div className="min-w-48 flex-1"><h2 className="font-semibold">{playlist.name}</h2><p className="mt-1 text-sm text-slate-500">{playlist.isPrivate ? "Private playlist" : "Visible to everyone"}</p></div><button type="button" onClick={() => togglePrivacy(playlist)} className="text-sm text-slate-700 hover:underline">Make {playlist.isPrivate ? "public" : "private"}</button><button type="button" onClick={() => remove(playlist._id)} className="text-sm text-rose-700 hover:underline">Delete</button></article>)}</div>}</div>;
+}
+export default Playlists;

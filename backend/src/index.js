@@ -1,9 +1,7 @@
 import dotenv from "dotenv"
 import { connectDB } from "./db/index.js";
-import { app } from "./app.js";
+import { server } from "./app.js";
 import { PORT } from "./constants.js";
-import http from "http";
-import { Server } from "socket.io";
 import { connectRedis } from "./utils/redis.js";
 
 dotenv.config({
@@ -15,7 +13,7 @@ const port = PORT;
 
 connectDB()
     .then(() => {
-        app.listen(port, () => {
+        server.listen(port, () => {
             console.log(`⚙️ Server is running at port : ${port}`);
         })
     })

@@ -35,13 +35,11 @@ function Login() {
                 password,
             });
 
-            dispatch(loginSuccess(response.data));
+            dispatch(loginSuccess(response.data.user));
 
             setSuccessMessage("Login successful!");
 
-            setTimeout(() => {
-                navigate("/");
-            }, 500);
+            navigate("/");
         } catch (error) {
             dispatch(loginFailure());
 

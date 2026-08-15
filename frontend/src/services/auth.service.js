@@ -19,3 +19,6 @@ export const logoutUser = async () => {
     const response = await api.post("/users/logout");
     return response.data;
 };
+
+export const updateAccountDetails = (data) => api.patch("/users/update-account-details", data);
+export const updateProfilePicture = (formData) => api.patch("/users/update-profile-pic", formData);

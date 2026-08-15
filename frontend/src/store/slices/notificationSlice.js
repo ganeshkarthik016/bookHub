@@ -4,6 +4,7 @@ const initialState = {
     notifications: [],
     unreadCount: 0,
     loading: false,
+    error: null,
 };
 
 const notificationSlice = createSlice({
@@ -14,6 +15,7 @@ const notificationSlice = createSlice({
     reducers: {
         notificationsStart: (state) => {
             state.loading = true;
+            state.error = null;
         },
 
         notificationsSuccess: (state, action) => {
@@ -23,6 +25,7 @@ const notificationSlice = createSlice({
 
         notificationsFailure: (state) => {
             state.loading = false;
+            state.error = "Unable to load notifications.";
         },
 
         setUnreadCount: (state, action) => {
