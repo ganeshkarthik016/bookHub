@@ -7,15 +7,8 @@ import { logoutUser } from '../../services/auth.service';
 
 function Navbar() {
     const [profileOpen, setProfileOpen] = useState(false);
-    const [notificationOpen, setNotificationOpen] =
-        useState(false);
 
     const user = useSelector((state) => state.auth.user);
-
-    const notifications = useSelector(
-        (state) => state.notifications.notifications
-    );
-
     const unreadCount = useSelector(
         (state) => state.notifications.unreadCount
     );
@@ -53,92 +46,35 @@ function Navbar() {
                 </div>
 
                 <div className="ml-auto flex items-center gap-3">
-                    {/* Notifications */}
-                    <div className="relative">
-                        <button
-                            type="button"
-                            onClick={() =>
-                                setNotificationOpen(
-                                    !notificationOpen
-                                )
-                            }
-                            className="relative rounded-lg p-2 hover:bg-gray-100"
+                    <button
+                        type="button"
+                        onClick={() => navigate('/notifications')}
+                        className="relative rounded-lg p-2 hover:bg-gray-100"
+                        title="Inbox"
+                    >
+                        <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
                         >
-                            🔔
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                            />
+                        </svg>
 
-                            {unreadCount > 0 && (
-                                <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-xs text-white">
-                                    {unreadCount > 99
-                                        ? '99+'
-                                        : unreadCount}
-                                </span>
-                            )}
-                        </button>
-
-                        {notificationOpen && (
-                            <div className="absolute right-0 top-12 z-50 w-80 rounded-lg border bg-white shadow-lg">
-                                <div className="flex items-center justify-between border-b p-4">
-                                    <h3 className="font-semibold">
-                                        Notifications
-                                    </h3>
-
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            navigate(
-                                                '/notifications'
-                                            )
-                                        }
-                                        className="text-sm hover:underline"
-                                    >
-                                        View all
-                                    </button>
-                                </div>
-
-                                <div className="max-h-80 overflow-y-auto">
-                                    {notifications.length ===
-                                    0 ? (
-                                        <p className="p-6 text-center text-sm text-gray-500">
-                                            No notifications
-                                        </p>
-                                    ) : (
-                                        notifications
-                                            .slice(0, 10)
-                                            .map(
-                                                (
-                                                    notification
-                                                ) => (
-                                                    <div
-                                                        key={
-                                                            notification._id
-                                                        }
-                                                        className={`border-b p-3 ${
-                                                            notification.isRead
-                                                                ? 'bg-white'
-                                                                : 'bg-gray-50'
-                                                        }`}
-                                                    >
-                                                        <p className="text-sm font-medium">
-                                                            {
-                                                                notification.title
-                                                            }
-                                                        </p>
-
-                                                        <p className="mt-1 text-xs text-gray-500">
-                                                            {
-                                                                notification.message
-                                                            }
-                                                        </p>
-                                                    </div>
-                                                )
-                                            )
-                                    )}
-                                </div>
-                            </div>
+                        {unreadCount > 0 && (
+                            <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-xs font-semibold text-white">
+                                {unreadCount > 99
+                                    ? '99+'
+                                    : unreadCount}
+                            </span>
                         )}
-                    </div>
+                    </button>
 
-                    {/* Profile */}
                     <div className="relative">
                         <button
                             type="button"
@@ -151,7 +87,7 @@ function Navbar() {
                                 {user?.profilePic ? (
                                     <img
                                         src={user.profilePic}
-                                        alt=""
+                                        alt={user.userName}
                                         className="h-full w-full object-cover"
                                     />
                                 ) : (
@@ -174,9 +110,7 @@ function Navbar() {
                                         setProfileOpen(
                                             false
                                         );
-                                        navigate(
-                                            '/profile'
-                                        );
+                                        navigate('/profile');
                                     }}
                                     className="w-full rounded-md px-3 py-2 text-left hover:bg-gray-100"
                                 >
