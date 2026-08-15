@@ -1,40 +1,33 @@
-import api from './api';
+import api from "./api";
 
-export const getNotifications = (page = 1, limit = 20) => {
-    return api.get('/notifications', {
-        params: {
-            page,
-            limit,
-        },
+export const getUnreadCount = async () => {
+    const response = await api.get("/notifications/count");
+    return response.data;
+};
+
+export const getUnreadNotifications = async () => {
+    const response = await api.get("/notifications/unread");
+    return response.data;
+};
+
+export const getNotifications = async (page = 1, limit = 20) => {
+    const response = await api.get("/notifications", {
+        params: { page, limit },
     });
+    return response.data;
 };
 
-export const getUnreadNotifications = (
-    page = 1,
-    limit = 20
-) => {
-    return api.get('/notifications/unread', {
-        params: {
-            page,
-            limit,
-        },
-    });
+export const markNotificationAsRead = async (notificationId) => {
+    const response = await api.patch(`/notifications/${notificationId}/read`);
+    return response.data;
 };
 
-export const getUnreadCount = () => {
-    return api.get('/notifications/count');
+export const markAllNotificationsAsRead = async () => {
+    const response = await api.patch("/notifications/read-all");
+    return response.data;
 };
 
-export const markNotificationAsRead = (notificationId) => {
-    return api.patch(
-        `/notifications/${notificationId}/read`
-    );
-};
-
-export const markAllNotificationsAsRead = () => {
-    return api.patch('/notifications/read-all');
-};
-
-export const deleteNotification = (notificationId) => {
-    return api.delete(`/notifications/${notificationId}`);
+export const deleteNotification = async (notificationId) => {
+    const response = await api.delete(`/notifications/${notificationId}`);
+    return response.data;
 };
