@@ -21,9 +21,9 @@ function Sidebar() {
             icon: '📚',
         },
         {
-            name: 'Notifications',
+            name: 'Inbox',
             path: '/notifications',
-            icon: '🔔',
+            icon: '📬',
         },
     ];
 
