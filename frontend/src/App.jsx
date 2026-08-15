@@ -50,8 +50,8 @@ function App() {
         const loadNotifications = async () => {
             try {
                 const [listResponse, countResponse] = await Promise.all([getNotifications(1, 20), getUnreadCount()]);
-                dispatch(notificationsSuccess(listResponse.data.data));
-                dispatch(setUnreadCount(countResponse.data.data.count));
+                dispatch(notificationsSuccess(listResponse.data));
+                dispatch(setUnreadCount(countResponse.data.count));
             } catch {
                 // Notifications are supplementary; the authenticated app remains usable if unavailable.
             }

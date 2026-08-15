@@ -1,14 +1,14 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { deleteNotification, getNotifications, markAllNotificationsAsRead, markNotificationAsRead } from "../services/notification.service";
 import { markAllNotificationsRead, markNotificationRead, notificationsFailure, notificationsStart, notificationsSuccess, removeNotification } from "../store/slices/notificationSlice";
 
 function Notifications() {
-    const dispatch = useDispatch(); const { notifications, loading, error } = useSelector((state) => state.notifications); const [page, setPage] = useState(1); const [hasMore, setHasMore] = useState(true); const [working, setWorking] = useState({});
-    const load = useCallback(async (nextPage = 1) => { dispatch(notificationsStart()); try { const response = await getNotifications(nextPage, 20); const items = response.data.data; dispatch(notificationsSuccess(nextPage === 1 ? items : [...notifications, ...items])); setPage(nextPage); setHasMore(items.length === 20); } catch { dispatch(notificationsFailure()); } }, [dispatch, notifications]);
+    const dispatch = useDispatch(); const { notifications: storedNotifications, loading, error } = useSelector((state) => state.notifications); const notifications = Array.isArray(storedNotifications) ? storedNotifications : []; const [page, setPage] = useState(1); const [hasMore, setHasMore] = useState(true); const [working, setWorking] = useState({});
+    const load = async (nextPage = 1) => { dispatch(notificationsStart()); try { const response = await getNotifications(nextPage, 20); const items = Array.isArray(response.data) ? response.data : []; dispatch(notificationsSuccess(nextPage === 1 ? items : [...notifications, ...items])); setPage(nextPage); setHasMore(items.length === 20); } catch { dispatch(notificationsFailure()); } };
     useEffect(() => {
         getNotifications(1, 20)
-            .then((response) => { dispatch(notificationsSuccess(response.data.data)); setHasMore(response.data.data.length === 20); })
+            .then((response) => { const items = Array.isArray(response.data) ? response.data : []; dispatch(notificationsSuccess(items)); setHasMore(items.length === 20); })
             .catch(() => dispatch(notificationsFailure()));
     }, [dispatch]);
     const action = async (id, request, reducer) => { setWorking((value) => ({ ...value, [id]: true })); try { await request(); dispatch(reducer(id)); } catch { dispatch(notificationsFailure()); } finally { setWorking((value) => ({ ...value, [id]: false })); } };

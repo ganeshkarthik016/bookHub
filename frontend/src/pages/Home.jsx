@@ -5,7 +5,8 @@ const formatTime = (value) => value ? new Intl.DateTimeFormat(undefined, { dateS
 
 function Home() {
     const user = useSelector((state) => state.auth.user);
-    const notifications = useSelector((state) => state.notifications.notifications);
+    const storedNotifications = useSelector((state) => state.notifications.notifications);
+    const notifications = Array.isArray(storedNotifications) ? storedNotifications : [];
     return <div className="mx-auto max-w-5xl space-y-10">
         <section className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200 pb-6">
             <div><p className="text-sm font-medium text-slate-500">Your study space</p><h1 className="mt-1 text-3xl font-bold tracking-tight">Welcome back, {user?.userFullName || user?.userName}</h1></div>
