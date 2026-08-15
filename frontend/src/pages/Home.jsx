@@ -2,9 +2,12 @@ import { useSelector } from 'react-redux';
 
 function Home() {
     const user = useSelector((state) => state.auth.user);
+    const notifications = useSelector(
+        (state) => state.notifications.notifications
+    );
 
     return (
-        <div className="space-y-8">
+        <div className="max-w-3xl space-y-8">
             <section>
                 <h1 className="text-3xl font-bold">
                     Welcome back, {user?.userFullName || user?.userName}
@@ -15,40 +18,54 @@ function Home() {
                 </p>
             </section>
 
-            <section className="grid gap-6 md:grid-cols-2">
-                <div className="rounded-xl border p-6">
-                    <h2 className="text-xl font-semibold">
-                        Upload Notes
-                    </h2>
+            <section>
+                <button
+                    type="button"
+                    className="rounded-lg bg-black px-4 py-2 text-white hover:bg-gray-800"
+                >
+                    + Upload Notes
+                </button>
+            </section>
 
-                    <p className="mt-2 text-gray-500">
-                        Upload and organize your study material.
-                    </p>
+            <section>
+                <h2 className="text-lg font-semibold mb-4">
+                    Recent Activity
+                </h2>
 
-                    <button
-                        type="button"
-                        className="mt-6 rounded-lg bg-black px-4 py-2 text-white hover:bg-gray-800"
-                    >
-                        + Upload Notes
-                    </button>
-                </div>
+                {notifications.length === 0 ? (
+                    <div className="text-center text-gray-500 py-8">
+                        <p>No activity yet</p>
+                    </div>
+                ) : (
+                    <div className="space-y-2 border rounded-lg overflow-hidden">
+                        {notifications.slice(0, 5).map((notification) => (
+                            <div
+                                key={notification._id}
+                                className={`border-b last:border-b-0 p-4 ${
+                                    notification.isRead
+                                        ? 'bg-white'
+                                        : 'bg-blue-50'
+                                }`}
+                            >
+                                <p className="text-sm font-medium text-gray-900">
+                                    {notification.title}
+                                </p>
 
-                <div className="rounded-xl border p-6">
-                    <h2 className="text-xl font-semibold">
-                        Unread Notifications
-                    </h2>
+                                <p className="mt-1 text-sm text-gray-600">
+                                    {notification.message}
+                                </p>
 
-                    <p className="mt-2 text-gray-500">
-                        Check activity you haven't seen yet.
-                    </p>
-
-                    <button
-                        type="button"
-                        className="mt-6 rounded-lg border px-4 py-2 hover:bg-gray-100"
-                    >
-                        View Notifications
-                    </button>
-                </div>
+                                <p className="mt-2 text-xs text-gray-400">
+                                    {
+                                        new Date(
+                                            notification.createdAt
+                                        ).toLocaleDateString()
+                                    }
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </section>
         </div>
     );
