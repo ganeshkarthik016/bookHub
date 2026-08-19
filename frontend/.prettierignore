@@ -1,6 +1,0 @@
-# .prettierignore
-node_modules
-build
-dist
-coverage
-public
