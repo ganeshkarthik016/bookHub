@@ -113,9 +113,13 @@ const updateNoteDetails = asyncHandler(async (req, res) => {
     note.description = description?.trim();
 
     if (tags) {
+        const tagsArray = Array.isArray(tags) ? tags : tags.split(",");
+
         note.tags = [...new Set(
-            tags.map(tag => tag.trim().toLowerCase())
-        )];
+        tagsArray
+            .map(tag => tag.trim().toLowerCase())
+            .filter(Boolean) 
+    )];
     }
 
     if (isPrivate !== undefined) {
@@ -180,12 +184,11 @@ const updateNote = asyncHandler(async (req, res) => {
     }
 
     if (uploadedCover) {
-        if (uploadedCover && note.coverImage?.publicId) {
+        if (uploadedCover && note.coverImage?.publicId && note.coverImage.publicId.length > 0) {
             try {
                 await cloudinary.uploader.destroy(note.coverImage.publicId);
             } catch (error) {
-                throw new apiError(500, "Failed to delete old cover image");
-                // Continue - don't block the update
+                 console.error("Failed to delete old cover image from Cloudinary:", error);
             }
         }
 
@@ -195,12 +198,11 @@ const updateNote = asyncHandler(async (req, res) => {
     }
     if (uploadedPdf) {
         if (uploadedPdf && note.pdf.publicId) {
-            const result = await cloudinary.uploader.destroy(
-                note.pdf.publicId
-            );
-
-            console.log(result);
-            console.log(note.pdf.publicId);
+try {
+        await cloudinary.uploader.destroy(note.pdf.publicId);
+    } catch (error) {
+        console.error("Failed to delete old PDF from Cloudinary:", error);
+    }
         }
         note.pdf.url = uploadedPdf.secure_url;
         note.pdf.publicId = uploadedPdf.public_id;
@@ -368,7 +370,8 @@ const searchNotes = asyncHandler(async (req, res) => {
     };
 
     // Search title or description
-    filter.$or = [
+    if (search && search.trim())
+    {filter.$or = [
         {
             title: {
                 $regex: search.trim(),
@@ -387,7 +390,7 @@ const searchNotes = asyncHandler(async (req, res) => {
                 $options: "i",
             },
         },
-    ];
+    ];}
 
     // Search by tag
     if (tag?.trim()) {
