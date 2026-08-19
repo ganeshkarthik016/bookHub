@@ -24,8 +24,9 @@ const toggleLike = asyncHandler(async (req, res) => {
     if (existingLike) {
         await existingLike.deleteOne();
 
-        note.likesCount = Math.max(0, note.likesCount - 1);
-        await note.save({ validateBeforeSave: false });
+        await Note.findByIdAndUpdate(noteId, { 
+            $inc: { likesCount: -1 } 
+        });
 
         return res.status(200).json(
             new apiResponse(
@@ -44,9 +45,9 @@ const toggleLike = asyncHandler(async (req, res) => {
         note: noteId,
     });
 
-    note.likesCount += 1;
-
-    await note.save({ validateBeforeSave: false });
+    await Note.findByIdAndUpdate(noteId, { 
+       $inc: { likesCount: 1 } 
+    });
 
     if (note.owner.toString() !== req.user._id.toString()) {
         await sendNotification({
