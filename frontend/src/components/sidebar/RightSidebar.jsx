@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import Button from "../Button"; // Assuming we made this earlier!
+import Button from "../Button.jsx"; // Assuming we made this earlier!
 
 export default function RightSidebar() {
     // We will fetch real suggestions from Redux/API later. 
