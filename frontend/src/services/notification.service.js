@@ -17,7 +17,7 @@ const getUnreadCount = async () => {
             "/notifications/count"
         );
 
-        return response.data;
+        return response.data.data;
     } catch (error) {
         handleError(error);
     }
@@ -35,7 +35,7 @@ const getUnreadNotifications = async (page = 1, limit = 20) => {
             }
         );
 
-        return response.data;
+        return response.data.data;
     } catch (error) {
         handleError(error);
     }
@@ -53,7 +53,7 @@ const getNotifications = async (page = 1, limit = 20) => {
             }
         );
 
-        return response.data;
+        return response.data.data;
     } catch (error) {
         handleError(error);
     }
@@ -67,7 +67,7 @@ const markNotificationAsRead = async (
             `/notifications/${notificationId}/read`
         );
 
-        return response.data;
+        return response.data.data;
     } catch (error) {
         handleError(error);
     }
@@ -79,7 +79,7 @@ const markAllNotificationsAsRead = async () => {
             "/notifications/read-all"
         );
 
-        return response.data;
+        return response.data.data;
     } catch (error) {
         handleError(error);
     }
@@ -93,7 +93,7 @@ const deleteNotification = async (
             `/notifications/${notificationId}`
         );
 
-        return response.data;
+        return response.data.data;
     } catch (error) {
         handleError(error);
     }

@@ -77,6 +77,14 @@ const notificationSlice = createSlice({
         setNotificationLoading: (state, action) => {
             state.loading = action.payload;
         },
+
+        appendNotifications: (state, action) => {
+            state.notifications = [...state.notifications, ...action.payload];
+            
+            state.unreadCount = state.notifications.filter(
+                (notification) => !notification.isRead
+            ).length;
+        },
     },
 });
 
@@ -88,6 +96,7 @@ export const {
     removeNotification,
     clearNotifications,
     setNotificationLoading,
+    appendNotifications,
 } = notificationSlice.actions;
 
 export default notificationSlice.reducer;

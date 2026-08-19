@@ -18,7 +18,7 @@ const loginUser = async (credentials) => {
             credentials
         );
 
-        return response.data;
+        return response.data.data;
     } catch (error) {
         handleError(error);
     }
@@ -31,7 +31,7 @@ const registerUser = async (userData) => {
             userData
         );
 
-        return response.data;
+        return response.data.data;
     } catch (error) {
         handleError(error);
     }
@@ -43,7 +43,7 @@ const logoutUser = async () => {
             "/users/logout"
         );
 
-        return response.data;
+        return response.data.data;
     } catch (error) {
         handleError(error);
     }
@@ -52,10 +52,21 @@ const logoutUser = async () => {
 const getCurrentUser = async () => {
     try {
         const response = await api.get(
-            "/users/current-user"
+            "/users/get-current-user"
         );
 
-        return response.data;
+        return response.data.data;
+    } catch (error) {
+        handleError(error);
+    }
+};
+
+const searchUsersCall = async (searchQuery) => {
+    try {
+        const response = await api.get("/users/search", {
+            params: { query: searchQuery }
+        });
+        return response.data.data;
     } catch (error) {
         handleError(error);
     }
@@ -66,4 +77,5 @@ export {
     registerUser,
     logoutUser,
     getCurrentUser,
+    searchUsersCall,
 };
