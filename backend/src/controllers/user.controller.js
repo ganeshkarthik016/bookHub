@@ -534,6 +534,28 @@ const getUserProfile = asyncHandler(async (req, res) => {
         )
     );
 });
+
+const searchUsers = asyncHandler(async (req, res) => {
+    const { query } = req.query;
+
+    if (!query || query.trim() === "") {
+        return res.status(200).json(new apiResponse(200, [], "Empty search query"));
+    }
+
+    const users = await User.find({
+        $or: [
+            { userName: { $regex: query, $options: "i" } },
+            { userFullName: { $regex: query, $options: "i" } }
+        ]
+    })
+    .select("userName userFullName profilePic followersCount") 
+    .limit(20) 
+    .lean();
+
+    return res.status(200).json(
+        new apiResponse(200, users, "Users fetched successfully")
+    );
+});
 // delete 
 
 const deleteUser = asyncHandler(async (req, res) => {
@@ -719,6 +741,7 @@ export {
     , updateProfilePic
     , deleteUser
     , getUserProfile
+    , searchUsers
     , changeGmail
     , forgetPasswordGenerateOtp
     , verifyResetPasswordOtp

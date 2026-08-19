@@ -9,6 +9,17 @@ import { User } from "../models/user.model.js";
 const getUnreadCount = asyncHandler(async (req, res) => {
     const cKey = countKey(req.user._id);
     const count = await redisClient.get(cKey);
+    
+    if (count === null) {
+        count = await Notification.countDocuments({ 
+            receiver: req.user._id, 
+            isRead: false 
+        });
+
+        const thirtyDaysInSeconds = 60 * 60 * 24 * 30;
+        await redisClient.set(cKey, count);
+        await redisClient.expire(cKey, thirtyDaysInSeconds);
+    }
 
     return res.status(200).json(
         new apiResponse(200, { count: parseInt(count || 0) }, "Unread count fetched")

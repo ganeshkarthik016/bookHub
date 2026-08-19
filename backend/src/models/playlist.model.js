@@ -10,7 +10,7 @@ const playlistSchema = new mongoose.Schema(
             minLength: 1,
         },
 
-        sortNotes: {
+        shortNotes: {
             type: String,
             default: "",
             trim: true
