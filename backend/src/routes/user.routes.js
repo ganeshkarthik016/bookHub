@@ -10,6 +10,7 @@ import {
     , updateProfilePic
     , deleteUser
     , getUserProfile
+    , searchUsers
     , changeGmail
     , forgetPasswordGenerateOtp
     , verifyResetPasswordOtp
@@ -59,7 +60,8 @@ router.route("/send-verification-otp").post(verifyJWT, otpLimiter, createAndSend
 router.route("/verify-email-otp").post(verifyJWT, verifyEmailOtp);
 //get
 router.route("/get-current-user").get(verifyJWT, getCurrentUser);
-router.route("/profile/:username").get(verifyJWT, getUserProfile);
+router.route("/profile/:userName").get(verifyJWT, getUserProfile);
+router.route("/search").get(verifyJWT, searchUsers);
 
 //delete
 router.route("/delete-account").delete(verifyJWT, deleteUser);//same bug
