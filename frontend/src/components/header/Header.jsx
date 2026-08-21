@@ -1,6 +1,7 @@
 import Logo from "./Logo.jsx";
 import SearchBar from "./SearchBar.jsx";
 import ProfileDropdown from "./ProfileDropdown.jsx";
+import NotificationDropdown from "./NotificationDropdown.jsx";
 
 export default function Header() {
     return (
@@ -8,6 +9,7 @@ export default function Header() {
             <Logo />
             <SearchBar />
             <ProfileDropdown />
+            <NotificationDropdown />
         </header>
     );
 }
