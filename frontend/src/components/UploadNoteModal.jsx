@@ -3,9 +3,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { closeModal } from "../store/slices/uiSlice";
 import { addNoteToTop } from "../store/slices/noteSlice";
 import { UploadCloud, Loader2 } from "lucide-react";
-import Modal from "./Modal";
-import Input from "./Input";
-import Button from "./Button";
+import Modal from "./Modal.jsx";
+import Input from "./Input.jsx";
+import Button from "./Button.jsx";
 import { uploadNotes } from "../services/note.service";
 
 export default function UploadNoteModal() {
