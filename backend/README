@@ -1,0 +1,171 @@
+# BookHub - Backend ⚙️
+
+This is the Express.js and Node.js backend for BookHub. It handles user authentication, RESTful API endpoints for study materials, database connections (MongoDB), caching (Redis), and real-time communication via Socket.IO.
+
+---
+
+## 📂 Folder Structure
+
+Here is an overview of the backend directory structure and what each part does:
+
+```text
+backend/
+├── public/                 # Static files
+├── src/
+│   ├── controllers/        # Route logic and request handling
+│   ├── db/                 # Database connection setup (MongoDB)
+│   ├── middlewares/        # Custom middlewares (auth, rate limits, multer, etc.)
+│   ├── models/             # Mongoose schemas and models
+│   ├── routes/             # Express route definitions
+│   ├── utils/              # Helper functions, custom error/response classes
+│   ├── app.js              # Express app setup and middleware configuration
+│   ├── constants.js        # Global constants (DB names, etc.)
+│   └── index.js            # Main entry point, server & Socket.IO initialization
+├── .dockerignore           # Files to ignore in Docker builds
+├── .env                    # Environment variables (do not commit this!)
+├── .env.example            # Template for environment variables
+├── .gitignore              # Files to ignore in Git
+├── .prettierignore         # Files to ignore for Prettier
+├── .prettierrc             # Prettier formatting rules
+├── Dockerfile              # Docker configuration for containerization
+├── package-lock.json       # Exact dependency versions
+└── package.json            # Project dependencies and scripts
+```
+
+---
+
+## 🛠️ Technologies Used
+
+- **Runtime:** Node.js
+- **Framework:** Express.js
+- **Database:** MongoDB & Mongoose
+- **Caching:** Redis
+- **Real-time:** Socket.IO
+- **Authentication & Security:** JWT, bcrypt, rate-limiting
+- **Email Services:** Nodemailer (OTPs & Verification)
+- **File Uploads:** Multer
+- **Containerization:** Docker
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+Make sure you have the following installed on your machine:
+
+- Node.js (v16 or higher recommended)
+- MongoDB (Local instance or MongoDB Atlas)
+- Redis (Local instance or cloud Redis)
+- Docker (Optional)
+
+### 1. Installation
+
+```bash
+cd backend
+npm install
+```
+
+### 2. Environment Variables
+
+Create a `.env` file in the root of the `backend` directory:
+
+```bash
+cp .env.example .env
+```
+
+Populate your `.env` with the necessary keys (MongoDB URI, Redis host/port, JWT secrets, Nodemailer credentials, etc.).
+
+### 3. Running the Server
+
+**Development Mode:**
+
+```bash
+npm run dev
+```
+
+---
+
+## 🔗 Main API Routes
+
+### 👤 Users & Authentication
+
+- `POST /register` - Register a new user with a profile picture[cite: 8]
+- `POST /login` - Authenticate user[cite: 8]
+- `POST /logout` - Secure logout[cite: 8]
+- `POST /refresh-token` - Refresh JWT access token[cite: 8]
+- `POST /send-verification-otp` - Send email verification OTP[cite: 8]
+- `POST /verify-email-otp` - Verify email[cite: 8]
+- `POST /forgot-password-otp` - Request password reset OTP[cite: 8]
+- `POST /verify-reset-password-otp` - Verify password reset[cite: 8]
+- `PATCH /change-password` - Change account password[cite: 8]
+- `PATCH /update-account-details` - Update text details[cite: 8]
+- `PATCH /update-profile-pic` - Update avatar image[cite: 8]
+- `PATCH /change-gmail` - Update account email[cite: 8]
+- `GET /get-current-user` - Fetch logged-in user data[cite: 8]
+- `GET /profile/:userName` - Fetch a user's public profile[cite: 8]
+- `GET /search` - Search for users[cite: 8]
+- `DELETE /delete-account` - Delete user account[cite: 8]
+
+### 📝 Notes
+
+- `POST /upload-notes` - Upload a new note (PDF + Cover Image)[cite: 4]
+- `PATCH /update-note-details/:noteId` - Update text info[cite: 4]
+- `PATCH /update-note/:noteId` - Update files (PDF/Image)[cite: 4]
+- `GET /get-current-note/:noteId` - Fetch specific note details[cite: 4]
+- `GET /get-my-notes` - Fetch logged-in user's notes[cite: 4]
+- `GET /get-user-notes/:userName` - Fetch specific user's public notes[cite: 4]
+- `GET /search-notes` - Search notes repository[cite: 4]
+- `GET /download-note/:noteId` - Generate a download link for a note[cite: 4]
+- `DELETE /delete-note/:noteId` - Remove a note[cite: 4]
+
+### ❤️ Likes & 💬 Comments
+
+- `POST /toggle/:noteId` - Toggle like status on a note[cite: 3]
+- `GET /my-likes` - Get all notes liked by current user[cite: 3]
+- `GET /is-liked/:noteId` - Check if user liked a note[cite: 3]
+- `GET /note/:noteId` - Get all likes for a specific note[cite: 3]
+- `POST /add-comment/:noteId` - Add a comment to a note[cite: 1]
+- `GET /get-comments/:noteId` - Fetch comments for a note[cite: 1]
+- `PATCH /edit-comment/:commentId` - Edit a comment[cite: 1]
+- `DELETE /delete-comment/:commentId` - Delete a comment[cite: 1]
+- `GET /get-my-comments` - View all comments made by the user[cite: 1]
+
+### 🤝 Connections (Followers)
+
+- `POST /toggle/:userId` - Follow/Unfollow a user[cite: 2]
+- `GET /is-following/:userId` - Check follow status[cite: 2]
+- `GET /followers/:userId` - Get user's followers list[cite: 2]
+- `GET /following/:userId` - Get accounts the user is following[cite: 2]
+- `GET /my-friends` - Get mutual connections[cite: 2]
+- `GET /suggestions` - Get follow recommendations[cite: 2]
+
+### 📚 Playlists & Sharing
+
+- `POST /create` - Create a new playlist[cite: 6]
+- `POST /add-to-playlist/:playlistId` - Toggle note in a playlist[cite: 6]
+- `PATCH /edit-playlist/:playlistId` - Update playlist details[cite: 6]
+- `PATCH /edit-playlist-item-order/:playlistId` - Reorder notes[cite: 6]
+- `GET /get-playlist/:playlistId` - Fetch playlist details[cite: 6]
+- `GET /get-my-playlists` - Fetch user's own playlists[cite: 6]
+- `GET /get-playlist-items/:playlistId` - View notes inside a playlist[cite: 6]
+- `DELETE /delete-playlist/:playlistId` - Delete playlist[cite: 6]
+- `POST /:playlistId/share` - Share a playlist with another user[cite: 7]
+- `GET /editor` / `GET /viewer` - Fetch shared playlists by role[cite: 7]
+- `GET /:playlistId/members` - View playlist members[cite: 7]
+- `PATCH /:playlistId/members/:userId` - Update a member's role[cite: 7]
+- `DELETE /:playlistId/members/:userId` - Remove a member[cite: 7]
+- `DELETE /:playlistId/leave` - Leave a shared playlist[cite: 7]
+
+### 🔔 Notifications
+
+- `GET /count` - Get unread notification count[cite: 5]
+- `GET /unread` - Fetch unread notifications[cite: 5]
+- `GET /` - Fetch all notifications[cite: 5]
+- `PATCH /read-all` - Mark all as read[cite: 5]
+- `PATCH /:notificationId/read` - Mark single notification as read[cite: 5]
+- `DELETE /:notificationId` - Remove a notification[cite: 5]
+
+---
+
+**BookHub** — _Backend Repository_
