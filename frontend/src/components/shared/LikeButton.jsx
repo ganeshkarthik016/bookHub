@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Heart } from "lucide-react";
-import { toggleLike } from "../services/like.service";
-import { useOptimisticToggle } from "../hooks/useOptimisticToggle";
+import { toggleLike } from "../../services/like.service";
+import { useOptimisticToggle } from "../../hooks/useOptimisticToggle";
 
 export default function LikeButton({ noteId, initialIsLiked = false, initialLikesCount = 0 }) {
     const [likesCount, setLikesCount] = useState(initialLikesCount);
