@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { UserPlus, Loader2 } from "lucide-react";
-import Modal from "./Modal";
-import Input from "./Input";
-import Button from "./Button";
+import Modal from "../ui/Modal";
+import Input from "../ui/Input";
+import Button from "../ui/Button";
 // import { sharePlaylist } from "../services/playlist.service"; // Ensure service exists
 
 export default function SharePlaylistModal({ isOpen, onClose, playlistId }) {

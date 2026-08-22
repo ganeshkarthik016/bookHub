@@ -6,14 +6,14 @@ import {
     markNotificationAsRead, 
     markAllNotificationsAsRead,
     deleteNotification 
-} from "../../services/notification.service";
+} from "../../../services/notification.service";
 import {
     setNotifications,
     markNotificationRead,
     markAllNotificationsRead,
     removeNotification
-} from "../../store/slices/notificationSlice";
-import NotificationCard from "../NotificationCard";
+} from "../../../store/slices/notificationSlice";
+import NotificationCard from "../../cards/NotificationCard";
 
 export default function NotificationDropdown() {
     const dispatch = useDispatch();

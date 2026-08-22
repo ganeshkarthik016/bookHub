@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { closeModal } from "../store/slices/uiSlice";
-import { addNoteToTop } from "../store/slices/noteSlice";
+import { closeModal } from "../../store/slices/uiSlice.js";
+import { addNoteToTop } from "../../store/slices/noteSlice.js";
 import { UploadCloud, Loader2 } from "lucide-react";
 import Modal from "./Modal.jsx";
 import Input from "./Input.jsx";
 import Button from "./Button.jsx";
-import { uploadNotes } from "../services/note.service";
+import { uploadNotes } from "../../services/note.service.js";
 
 export default function UploadNoteModal() {
     const dispatch = useDispatch();

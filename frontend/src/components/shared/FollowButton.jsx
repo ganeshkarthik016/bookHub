@@ -1,6 +1,6 @@
-import { toggleFollow } from "../services/follow.service";
-import { useOptimisticToggle } from "../hooks/useOptimisticToggle";
-import Button from "./Button";
+import { toggleFollow } from "../../services/follow.service";
+import { useOptimisticToggle } from "../../hooks/useOptimisticToggle";
+import Button from "../ui/Button";
 
 export default function FollowButton({ userId, initialIsFollowing = false, className = "" }) {
     const { isToggled: isFollowing, isLoading, handleToggle } = useOptimisticToggle({

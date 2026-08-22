@@ -2,14 +2,14 @@ import { useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Editor } from "@tinymce/tinymce-react";
 import html2pdf from "html2pdf.js";
-import { closeModal } from "../store/slices/uiSlice.js";
-import { addNoteToTop } from "../store/slices/noteSlice.js"; 
+import { closeModal } from "../../store/slices/uiSlice.js";
+import { addNoteToTop } from "../../store/slices/noteSlice.js"; 
 import { FileText, Loader2 } from "lucide-react";
 import Modal from "./Modal.jsx";
 import Input from "./Input.jsx";
 import Button from "./Button.jsx";
-import { uploadNotes } from "../services/note.service";
-import conf from "../conf/conf.js";
+import { uploadNotes } from "../../services/note.service.js";
+import conf from "../../conf/conf.js";
 
 export default function WriteNoteModal() {
     const dispatch = useDispatch();

@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { Menu } from "lucide-react";
-import { toggleSidebar } from "../../store/slices/uiSlice";
+import { toggleSidebar } from "../../../store/slices/uiSlice";
 
 export default function Logo() {
     const dispatch = useDispatch();
