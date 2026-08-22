@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import FollowButton from "../FollowButton";
+import FollowButton from "../shared/FollowButton.jsx";
 
 export default function UserCard({ user, currentUserId }) {
     const isSelf = currentUserId === user._id;
