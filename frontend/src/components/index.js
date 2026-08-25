@@ -33,3 +33,15 @@ export {default as CommentSection} from "./shared/CommentSection.jsx";
 
 // Layout
 export { default as MainLayout } from "./layout/MainLayout.jsx";
+export { default as Header } from "./layout/header/Header.jsx";
+export { default as Logo } from "./layout/header/Logo.jsx";
+export { default as SearchBar } from "./layout/header/SearchBar.jsx";
+export { default as ProfileDropdown } from "./layout/header/ProfileDropdown.jsx";
+export { default as NotificationDropdown } from "./layout/header/NotificationDropdown.jsx";
+export { default as Sidebar } from "./layout/sidebar/Sidebar.jsx";
+export { default as RightSidebar } from "./layout/sidebar/RightSidebar.jsx";
+export { default as Footer } from "./layout/footer/Footer.jsx";
+
+
+//auth
+export {default as AuthLayout} from "./auth/AuthLayout.jsx";
