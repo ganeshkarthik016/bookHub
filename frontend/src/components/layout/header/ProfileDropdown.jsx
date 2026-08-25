@@ -1,13 +1,28 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 import { User, LogOut } from "lucide-react";
+import { logoutUser } from "../../../services/auth.service"; 
+import { logoutSuccess } from "../../../store/slices/authSlice"; 
 
 export default function ProfileDropdown() {
     const { user } = useSelector((state) => state.auth);
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
 
     if (!user) return null;
+
+    const handleLogout = async () => {
+        setIsOpen(false);
+        try {
+            await logoutUser();
+            dispatch(logoutSuccess());
+            navigate("/login");
+        } catch (error) {
+            console.error("Logout failed", error);
+        }
+    };
 
     return (
         <div className="relative">
@@ -33,10 +48,7 @@ export default function ProfileDropdown() {
                     </Link>
                     <button 
                         className="flex w-full items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                        onClick={() => {
-                            setIsOpen(false);
-                            // TODO: Dispatch logout action
-                        }}
+                        onClick={handleLogout}
                     >
                         <LogOut className="mr-2 h-4 w-4" /> Logout
                     </button>

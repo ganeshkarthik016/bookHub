@@ -23,7 +23,6 @@ export default function NotificationDropdown() {
     const [isLoading, setIsLoading] = useState(false);
     const dropdownRef = useRef(null);
 
-    // Initial fetch for the unread count/notifications
     useEffect(() => {
         const fetchInitialNotifications = async () => {
             try {
@@ -36,7 +35,6 @@ export default function NotificationDropdown() {
         fetchInitialNotifications();
     }, [dispatch]);
 
-    // Close dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -47,9 +45,7 @@ export default function NotificationDropdown() {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    // Handlers
     const handleMarkAsRead = async (notificationId) => {
-        // Optimistic UI update for instant O(1) feedback
         dispatch(markNotificationRead(notificationId));
         try {
             await markNotificationAsRead(notificationId);

@@ -42,16 +42,13 @@ export default function SaveToPlaylistModal({ noteId }) {
     }, [isOpen, noteId]);
 
     const handleToggle = async (playlistId, currentIndex) => {
-        // Optimistic UI update for instant feedback
         const newPlaylists = [...playlists];
         newPlaylists[currentIndex].isPresent = !newPlaylists[currentIndex].isPresent;
         setPlaylists(newPlaylists);
 
         try {
-            // Using the exact name from your playlist.service.js
             await toggleNoteInPlaylist(playlistId, noteId);
         } catch (err) {
-            // Revert on failure
             newPlaylists[currentIndex].isPresent = !newPlaylists[currentIndex].isPresent;
             setPlaylists([...newPlaylists]);
             setError("Failed to update playlist");
