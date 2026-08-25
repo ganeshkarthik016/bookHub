@@ -1,0 +1,181 @@
+import { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { Loader2, Download, BookmarkPlus, Eye, Calendar } from "lucide-react";
+import { getCurrentNote, downloadNote } from "../services/note.service";
+import { openModal } from "../store/slices/uiSlice";
+import { setCurrentNote } from "../store/slices/noteSlice"; 
+import { LikeButton, FollowButton, CommentSection, Button, EmptyState, SaveToPlaylistModal } from "../components";
+
+export default function NoteDetails() {
+    const { noteId } = useParams();
+    const dispatch = useDispatch();
+    const { user: currentUser } = useSelector((state) => state.auth);
+    
+    const [note, setNote] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState("");
+    const [isDownloading, setIsDownloading] = useState(false);
+
+    useEffect(() => {
+        const fetchNote = async () => {
+            setIsLoading(true);
+            setError("");
+            try {
+                const data = await getCurrentNote(noteId);
+                setNote(data);
+                // Dispatch to Redux so the rest of the app knows what note we are looking at!
+                dispatch(setCurrentNote(data)); 
+            } catch (err) {
+                setError(err.message || "Failed to load note details.");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        if (noteId) fetchNote();
+    }, [noteId, dispatch]);
+
+    const handleDownload = async () => {
+        setIsDownloading(true);
+        try {
+            const data = await downloadNote(noteId);
+            if (data?.downloadUrl) {
+                // Open the PDF in a new tab to trigger the browser's download
+                window.open(data.downloadUrl, "_blank");
+                // Optimistically update the download count in the UI
+                setNote(prev => ({ ...prev, downloads: prev.downloads + 1 }));
+            }
+        } catch (err) {
+            console.error("Failed to download note");
+        } finally {
+            setIsDownloading(false);
+        }
+    };
+
+    if (isLoading) {
+        return (
+            <div className="flex h-[70vh] items-center justify-center">
+                <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
+            </div>
+        );
+    }
+
+    if (error || !note) {
+        return (
+            <div className="mt-10">
+                <EmptyState 
+                    title="Note Not Found" 
+                    description={error || "This note might be private or deleted."} 
+                />
+            </div>
+        );
+    }
+
+    const isOwner = currentUser?._id === note.owner?._id;
+
+    return (
+        <div className="mx-auto max-w-4xl pb-12">
+            
+            {/* --- Note Header Info --- */}
+            <div className="mb-6 flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+                
+                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                    <div>
+                        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{note.title}</h1>
+                        <p className="mt-2 text-gray-600 whitespace-pre-wrap">{note.description}</p>
+                    </div>
+
+                    {/* Action Buttons: Like & Save */}
+                    <div className="flex items-center gap-3 shrink-0">
+                        <LikeButton 
+                            noteId={note._id} 
+                            initialIsLiked={note.isLiked} 
+                            initialLikesCount={note.likesCount} 
+                        />
+                        <button 
+                            onClick={() => dispatch(openModal("SAVE_TO_PLAYLIST"))}
+                            className="flex items-center justify-center rounded-full bg-gray-100 p-2 text-gray-600 transition-colors hover:bg-gray-200 hover:text-gray-900"
+                            title="Save to Playlist"
+                        >
+                            <BookmarkPlus className="h-5 w-5" />
+                        </button>
+                    </div>
+                </div>
+
+                {/* Tags */}
+                {note.tags?.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                        {note.tags.map((tag, index) => (
+                            <span key={index} className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-600">
+                                #{tag}
+                            </span>
+                        ))}
+                    </div>
+                )}
+
+                <hr className="my-2 border-gray-100" />
+
+                {/* Author Info & Stats */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                        <Link to={`/profile/${note.owner?.userName}`} className="shrink-0">
+                            <img 
+                                src={note.owner?.profilePic?.url || "https://via.placeholder.com/50"} 
+                                alt={note.owner?.userName} 
+                                className="h-12 w-12 rounded-full border border-gray-200 object-cover"
+                            />
+                        </Link>
+                        <div className="flex flex-col">
+                            <Link to={`/profile/${note.owner?.userName}`} className="font-bold text-gray-900 hover:underline">
+                                {note.owner?.userFullName || note.owner?.userName}
+                            </Link>
+                            <span className="text-sm text-gray-500">@{note.owner?.userName}</span>
+                        </div>
+                        
+                        {!isOwner && (
+                            <div className="ml-2">
+                                <FollowButton userId={note.owner?._id} initialIsFollowing={note.owner?.isFollowing} />
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                        <span className="flex items-center gap-1"><Eye className="h-4 w-4"/> {note.views} Views</span>
+                        <span className="flex items-center gap-1"><Download className="h-4 w-4"/> {note.downloads} Downloads</span>
+                        <span className="flex items-center gap-1"><Calendar className="h-4 w-4"/> {new Date(note.createdAt).toLocaleDateString()}</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* --- The PDF Viewer Container --- */}
+            <div className="mb-6 overflow-hidden rounded-xl border border-gray-200 bg-gray-900 shadow-sm">
+                <iframe 
+                    src={note.pdf?.url ? `${note.pdf.url}#view=FitH` : ""} 
+                    title={note.title}
+                    className="h-[70vh] w-full border-0 bg-white"
+                    allowFullScreen
+                />
+                
+                <div className="flex items-center justify-between bg-gray-900 px-4 py-3 text-white">
+                    <span className="text-sm font-medium">Document Preview</span>
+                    <Button 
+                        onClick={handleDownload} 
+                        disabled={isDownloading}
+                        className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600"
+                    >
+                        {isDownloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                        Download PDF
+                    </Button>
+                </div>
+            </div>
+
+            {/* --- Interactive Sections --- */}
+            <CommentSection noteId={note._id} currentUserId={currentUser?._id} />
+            
+            {/* Mounting the modal locally so it easily receives the note._id prop */}
+            <SaveToPlaylistModal noteId={note._id} />
+
+        </div>
+    );
+}

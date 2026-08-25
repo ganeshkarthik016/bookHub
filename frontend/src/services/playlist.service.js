@@ -105,3 +105,42 @@ export const removeMember = async (playlistId, userId) => {
         return response.data.data;
     } catch (error) { handleError(error); }
 };
+
+// --- MISSING PLAYLIST ROUTES ---
+
+export const getUserPlaylists = async (userName) => {
+    try {
+        const response = await api.get(`/playlists/get-user-playlists/${userName}`); 
+        return response.data.data;
+    } catch (error) { handleError(error); }
+};
+
+export const isNotePresentInPlaylist = async (playlistId) => {
+    try {
+        const response = await api.get(`/playlists/is-note-present-in-playlist/${playlistId}`); 
+        return response.data.data;
+    } catch (error) { handleError(error); }
+};
+
+// --- MISSING PLAYLIST SHARE ROUTES ---
+
+export const getMyEditorPlaylists = async () => {
+    try {
+        const response = await api.get("/playlistShares/editor"); 
+        return response.data.data;
+    } catch (error) { handleError(error); }
+};
+
+export const getMyViewerPlaylists = async () => {
+    try {
+        const response = await api.get("/playlistShares/viewer"); 
+        return response.data.data;
+    } catch (error) { handleError(error); }
+};
+
+export const leavePlaylist = async (playlistId) => {
+    try {
+        const response = await api.delete(`/playlistShares/${playlistId}/leave`); 
+        return response.data.data;
+    } catch (error) { handleError(error); }
+};

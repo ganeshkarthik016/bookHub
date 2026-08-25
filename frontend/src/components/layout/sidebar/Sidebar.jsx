@@ -1,7 +1,7 @@
 import { NavLink } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { Home, FileText, ListMusic, Inbox, X } from "lucide-react";
-import { toggleSidebar } from "../../store/slices/uiSlice";
+import { toggleSidebar } from "../../../store/slices/uiSlice.js";
 
 export default function Sidebar() {
     const dispatch = useDispatch();

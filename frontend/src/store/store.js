@@ -9,9 +9,9 @@ import uiReducer from "./slices/uiSlice.js";
 export const store = configureStore({
     reducer: {
         auth : authReducer,
-        notification : notificationReducer,
-        note : noteReducer,
-        playlist : playlistReducer,
+        notifications : notificationReducer,
+        notes : noteReducer,
+        playlists : playlistReducer,
         ui : uiReducer,
     },
 });

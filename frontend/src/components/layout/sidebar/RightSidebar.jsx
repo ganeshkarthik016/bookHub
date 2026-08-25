@@ -1,13 +1,30 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import Button from "../Button.jsx"; // Assuming we made this earlier!
+import { getSuggestions } from "../../../services/follow.service.js";
+import FollowButton from "../../shared/FollowButton.jsx";
 
 export default function RightSidebar() {
-    // We will fetch real suggestions from Redux/API later. 
-    // This is placeholder data so you can see the UI layout.
-    const mockSuggestions = [
-        { id: 1, userName: "alice_dev", name: "Alice", mutual: 3 },
-        { id: 2, userName: "bob_coder", name: "Bob", mutual: 1 },
-    ];
+    const [suggestions, setSuggestions] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchSuggestions = async () => {
+            setIsLoading(true);
+            try {
+                // Fetch page 1 of suggestions
+                const data = await getSuggestions(1); 
+                if (data && Array.isArray(data)) {
+                    setSuggestions(data);
+                }
+            } catch (error) {
+                console.error("Failed to load suggestions", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchSuggestions();
+    }, []);
 
     return (
         <aside className="hidden w-80 flex-shrink-0 border-l border-gray-200 bg-white p-6 xl:block">
@@ -17,31 +34,41 @@ export default function RightSidebar() {
                 </h3>
                 
                 <div className="flex flex-col gap-4">
-                    {mockSuggestions.map((user) => (
-                        <div key={user.id} className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <img 
-                                    src="https://via.placeholder.com/40" 
-                                    alt="Avatar" 
-                                    className="h-10 w-10 rounded-full object-cover border border-gray-200"
-                                />
-                                <div className="flex flex-col">
-                                    <Link 
-                                        to={`/profile/${user.userName}`}
-                                        className="text-sm font-bold text-gray-900 hover:underline"
-                                    >
-                                        {user.userName}
+                    {isLoading ? (
+                        <div className="animate-pulse text-sm text-gray-400">Loading suggestions...</div>
+                    ) : suggestions.length > 0 ? (
+                        suggestions.map((suggestion) => (
+                            <div key={suggestion._id} className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <Link to={`/profile/${suggestion.user.userName}`} className="shrink-0">
+                                        <img 
+                                            src={suggestion.user.profilePic?.url || "https://via.placeholder.com/40"} 
+                                            alt={suggestion.user.userName} 
+                                            className="h-10 w-10 rounded-full object-cover border border-gray-200"
+                                        />
                                     </Link>
-                                    <span className="text-xs text-gray-500">
-                                        {user.mutual} mutual friends
-                                    </span>
+                                    <div className="flex flex-col">
+                                        <Link 
+                                            to={`/profile/${suggestion.user.userName}`}
+                                            className="text-sm font-bold text-gray-900 hover:underline line-clamp-1"
+                                        >
+                                            {suggestion.user.userName}
+                                        </Link>
+                                        <span className="text-xs text-gray-500">
+                                            {suggestion.mutualFriends} mutual friends
+                                        </span>
+                                    </div>
                                 </div>
+                                <FollowButton 
+                                    userId={suggestion._id} 
+                                    initialIsFollowing={false} 
+                                    className="px-3 py-1 text-xs" 
+                                />
                             </div>
-                            <button className="text-sm font-semibold text-blue-600 hover:text-blue-800">
-                                Follow
-                            </button>
-                        </div>
-                    ))}
+                        ))
+                    ) : (
+                        <div className="text-sm text-gray-500">No suggestions right now.</div>
+                    )}
                 </div>
 
                 <div className="mt-8 text-xs text-gray-400">

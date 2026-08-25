@@ -16,7 +16,7 @@ export default function CommentSection({ noteId, currentUserId }) {
         const fetchComments = async () => {
             setIsLoading(true);
             try {
-                const data = await getNoteComments(noteId, { page: 1 });
+                const data = await getNoteComments(noteId, 1);
                 if (data) {
                     setComments(data.comments);
                     setHasMore(data.hasMore);
@@ -36,7 +36,7 @@ export default function CommentSection({ noteId, currentUserId }) {
 
         setIsPosting(true);
         try {
-            const response = await addComment(noteId, { text: newComment });
+            const response = await addComment(noteId, newComment);
             if (response) {
                 // Optimistically add the new comment to the top of the list
                 setComments([{...response, user: { _id: currentUserId, userName: "You" }}, ...comments]);
@@ -60,7 +60,8 @@ export default function CommentSection({ noteId, currentUserId }) {
 
     const handleEdit = async (commentId, newText) => {
         try {
-            const updated = await editMyComment(commentId, { text: newText });
+            // FIX: Passed newText as a string instead of { text: newText }
+            const updated = await editMyComment(commentId, newText);
             setComments(comments.map(c => c._id === commentId ? updated : c));
         } catch (error) {
             console.error("Failed to edit");
@@ -70,7 +71,7 @@ export default function CommentSection({ noteId, currentUserId }) {
     const loadMore = async () => {
         const nextPage = page + 1;
         try {
-            const data = await getNoteComments(noteId, { page: nextPage });
+            const data = await getNoteComments(noteId, nextPage);
             if (data) {
                 setComments([...comments, ...data.comments]);
                 setPage(nextPage);
