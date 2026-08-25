@@ -74,3 +74,12 @@ export const verifyEmailOtp = async (otpData) => {
         return response.data.data;
     } catch (error) { handleError(error); }
 };
+
+export const getUserProfile = async (userName) => {
+    try {
+        const response = await api.get(`/users/profile/${userName}`);
+        return response.data.data;
+    } catch (error) {
+        handleError(error);
+    }
+};

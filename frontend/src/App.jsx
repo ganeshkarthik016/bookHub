@@ -4,16 +4,16 @@ import { useDispatch, useSelector } from "react-redux";
 import { Loader2 } from "lucide-react";
 
 // Redux Actions & Services
-import { loginSuccess, logoutSuccess } from "./store/slices/authSlice";
+import { loginSuccess, logout } from "./store/slices/authSlice"; 
 import { getCurrentUser } from "./services/auth.service";
 
 // Layouts & Global Components
-import { MainLayout, AuthLayout } from "./components"; 
+import { MainLayout, AuthLayout } from "./components/index.js"; 
 import GlobalModals from "./components/GlobalModals";
 
 // Pages
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
+import Login from "./pages/Login.jsx";
+import Signup from "./pages/Signup.jsx";
 import Home from "./pages/Home";
 import Search from "./pages/Search";
 import Inbox from "./pages/Inbox";
@@ -29,7 +29,6 @@ function App() {
     const { isAuthenticated } = useSelector((state) => state.auth);
     const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
-    // Initial Auth Check on Application Load
     useEffect(() => {
         const checkAuth = async () => {
             try {
@@ -37,10 +36,10 @@ function App() {
                 if (user) {
                     dispatch(loginSuccess(user));
                 } else {
-                    dispatch(logoutSuccess());
+                    dispatch(logout()); // CHANGED
                 }
             } catch (error) {
-                dispatch(logoutSuccess());
+                dispatch(logout()); // CHANGED
             } finally {
                 setIsCheckingAuth(false);
             }
@@ -62,16 +61,18 @@ function App() {
             {/* Renders any modal triggered by Redux */}
             <GlobalModals /> 
             
+            {/* THE MISSING ROUTES TAG IS BACK! */}
             <Routes>
+                
                 {/* --- PUBLIC ROUTES (Auth) --- */}
-                <Route element={<AuthLayout />}>
+                <Route element={<AuthLayout authentication={false} />}>
                     <Route 
                         path="/login" 
-                        element={!isAuthenticated ? <Login /> : <Navigate to="/" />} 
+                        element={<Login />} 
                     />
                     <Route 
                         path="/signup" 
-                        element={!isAuthenticated ? <Signup /> : <Navigate to="/" />} 
+                        element={<Signup />} 
                     />
                 </Route>
 
@@ -91,6 +92,7 @@ function App() {
 
                 {/* --- 404 CATCH-ALL --- */}
                 <Route path="*" element={<NotFound />} />
+                
             </Routes>
         </BrowserRouter>
     );

@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { User, LogOut } from "lucide-react";
 import { logoutUser } from "../../../services/auth.service"; 
-import { logoutSuccess } from "../../../store/slices/authSlice"; 
+import { logout } from "../../../store/slices/authSlice"; 
 
 export default function ProfileDropdown() {
     const { user } = useSelector((state) => state.auth);
@@ -17,7 +17,7 @@ export default function ProfileDropdown() {
         setIsOpen(false);
         try {
             await logoutUser();
-            dispatch(logoutSuccess());
+            dispatch(logout()); // CHANGED
             navigate("/login");
         } catch (error) {
             console.error("Logout failed", error);

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { getSuggestions } from "../../services/follow.service";
-import FollowButton from "../shared/FollowButton";
+import { getSuggestions } from "../../../services/follow.service.js";
+import FollowButton from "../../shared/FollowButton.jsx";
 
 export default function RightSidebar() {
     const [suggestions, setSuggestions] = useState([]);

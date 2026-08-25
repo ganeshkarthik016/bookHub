@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { AlertTriangle, Loader2, Trash2 } from "lucide-react";
 import { closeModal } from "../../store/slices/uiSlice";
-import { logoutSuccess } from "../../store/slices/authSlice";
+import { logout } from "../../store/slices/authSlice"; // CHANGED to logout
 import { deleteAccount } from "../../services/user.service";
 import Modal from "../ui/Modal";
 import Input from "../ui/Input";
@@ -33,7 +33,7 @@ export default function DeleteAccountModal() {
             
             // On success, clear the Redux state, close the modal, and boot them to signup
             dispatch(closeModal());
-            dispatch(logoutSuccess());
+            dispatch(logout()); // CHANGED to logout()
             navigate("/signup");
         } catch (err) {
             setError(err.message || "Failed to delete account. Please check your password.");
