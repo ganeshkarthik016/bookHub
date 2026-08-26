@@ -12,15 +12,18 @@ export default function LikeButton({ noteId, initialLikesCount = 0 }) {
     const [isChecking, setIsChecking] = useState(true);
 
     useEffect(() => {
+        setLikesCount(initialLikesCount);
+    }, [initialLikesCount]);
+
+    useEffect(() => {
         const fetchLikeStatus = async () => {
             if (!currentUser) {
                 setIsChecking(false);
                 return;
             }
             try {
-                // Use the aliased function
                 const response = await checkLikeStatus(noteId);
-                setIsLiked(response.isLiked);
+                setIsLiked(response.liked);
             } catch (error) {
                 console.error("Failed to check like status");
             } finally {
