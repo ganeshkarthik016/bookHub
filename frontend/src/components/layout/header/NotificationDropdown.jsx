@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Bell, CheckCheck } from "lucide-react";
+import { useSocket } from "../../../context/SocketContext";
 import { 
     getUnreadNotifications, 
     markNotificationAsRead, 
@@ -11,17 +12,33 @@ import {
     setNotifications,
     markNotificationRead,
     markAllNotificationsRead,
-    removeNotification
+    removeNotification,
+    addNotification
 } from "../../../store/slices/notificationSlice";
 import NotificationCard from "../../cards/NotificationCard";
 
 export default function NotificationDropdown() {
     const dispatch = useDispatch();
+    const { socket } = useSocket();
     const { notifications, unreadCount } = useSelector((state) => state.notifications);
     
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const dropdownRef = useRef(null);
+
+    useEffect(() => {
+        if (!socket) return;
+
+        const handleNewNotification = (newNotification) => {
+            dispatch(addNotification(newNotification));
+        };
+
+        socket.on("new_notification", handleNewNotification);
+
+        return () => {
+            socket.off("new_notification", handleNewNotification);
+        };
+    }, [socket, dispatch]);
 
     useEffect(() => {
         const fetchInitialNotifications = async () => {

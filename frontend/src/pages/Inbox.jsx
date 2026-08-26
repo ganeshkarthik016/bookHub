@@ -1,19 +1,34 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { CheckCheck, Loader2, Bell } from "lucide-react";
+import { useSocket } from "../context/SocketContext";
 import { getNotifications, markNotificationAsRead, markAllNotificationsAsRead, deleteNotification } from "../services/notification.service";
-import { markNotificationRead, markAllNotificationsRead, removeNotification } from "../store/slices/notificationSlice";
+import { markNotificationRead, markAllNotificationsRead, removeNotification, addNotification } from "../store/slices/notificationSlice";
 import { NotificationCard, EmptyState, Button } from "../components";
 
 export default function Inbox() {
     const dispatch = useDispatch();
-    // We can pull the unreadCount from Redux, but we'll fetch the full list locally
+    const { socket } = useSocket();
     const { unreadCount } = useSelector((state) => state.notifications);
     
     const [notifications, setLocalNotifications] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(false);
+    useEffect(() => {
+        if (!socket) return;
+
+        const handleNewNotification = (newNotification) => {
+
+            dispatch(addNotification(newNotification));
+            setLocalNotifications((prev) => [newNotification, ...prev]);
+        };
+        socket.on("new_notification", handleNewNotification);
+
+        return () => {
+            socket.off("new_notification", handleNewNotification);
+        };
+    }, [socket, dispatch]);
 
     useEffect(() => {
         const fetchInbox = async () => {
@@ -22,7 +37,6 @@ export default function Inbox() {
                 const data = await getNotifications(1, 20);
                 if (data && Array.isArray(data)) {
                     setLocalNotifications(data);
-                    // Simple heuristic: if we got exactly 20, there might be more
                     setHasMore(data.length === 20); 
                 }
             } catch (error) {

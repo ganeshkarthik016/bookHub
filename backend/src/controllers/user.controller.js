@@ -198,6 +198,8 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
         }
         const new_accessToken = await user.generateAccessToken();
         const new_refreshToken = await user.generateRefreshToken();
+        user.refreshToken = new_refreshToken;
+        await user.save({ validateBeforeSave: false });
         return res.status(200)
             .cookie("refreshToken", new_refreshToken, options)
             .cookie("accessToken", new_accessToken, options)
