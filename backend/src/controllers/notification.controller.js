@@ -8,7 +8,7 @@ import { User } from "../models/user.model.js";
 
 const getUnreadCount = asyncHandler(async (req, res) => {
     const cKey = countKey(req.user._id);
-    const count = await redisClient.get(cKey);
+    let count = await redisClient.get(cKey);
     
     if (count === null) {
         count = await Notification.countDocuments({ 
