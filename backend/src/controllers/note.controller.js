@@ -226,7 +226,10 @@ try {
 const getCurrentNote = asyncHandler(async (req, res) => {
     const { noteId } = req.params;
 
-    const note = await Note.findById(noteId);
+    const note = await Note.findById(noteId).populate(
+    "owner", 
+    "userName userFullName profilePic"
+    );
 
     if (!note) {
         throw new apiError(404, "Note not found");
@@ -281,7 +284,9 @@ const getMyNotes = asyncHandler(async (req, res) => {
 
     const notes = await Note.find({
         owner: req.user._id
-    }).sort(sortOption)
+    })
+    .populate("owner", "userName userFullName profilePic")
+    .sort(sortOption)
         .skip((page - 1) * limit)
         .limit(limit);
 
@@ -335,7 +340,9 @@ const getUserNotes = asyncHandler(async (req, res) => {
     const notes = await Note.find({
         owner: userId,
         isPrivate: false
-    }).sort(sortOption)
+    })
+    .populate("owner", "userName userFullName profilePic")
+    .sort(sortOption)
         .skip((page - 1) * limit)
         .limit(limit);
 
@@ -418,6 +425,7 @@ const searchNotes = asyncHandler(async (req, res) => {
     }
 
     const notes = await Note.find(filter)
+    .populate("owner", "userName userFullName profilePic")
         .sort(sortOption)
         .skip((pageNo - 1) * pageLimit)
         .limit(pageLimit);
