@@ -22,7 +22,7 @@ const uploadOnCloudinary = async (
         if (!localFilePath) return null;
 
         const response = await cloudinary.uploader.upload(localFilePath, {
-            resource_type: "auto",
+            resource_type: "raw",
             folder,
         });
         // console.log("Path:", localFilePath);

@@ -36,7 +36,7 @@ export default function UploadNoteModal() {
             formData.append("title", title);
             formData.append("description", description);
             formData.append("isPrivate", isPrivate);
-            formData.append("noteFile", pdfFile);
+            formData.append("pdf", pdfFile);
             if (coverImage) formData.append("coverImage", coverImage);
 
             // Execute the API call using your exact service

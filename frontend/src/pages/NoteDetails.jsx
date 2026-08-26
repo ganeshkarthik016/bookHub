@@ -40,10 +40,10 @@ export default function NoteDetails() {
         setIsDownloading(true);
         try {
             const data = await downloadNote(noteId);
+            
             if (data?.downloadUrl) {
-                // Open the PDF in a new tab to trigger the browser's download
+                // FIXED: Just open the secure URL without the fl_attachment hack
                 window.open(data.downloadUrl, "_blank");
-                // Optimistically update the download count in the UI
                 setNote(prev => ({ ...prev, downloads: prev.downloads + 1 }));
             }
         } catch (err) {
@@ -150,12 +150,12 @@ export default function NoteDetails() {
 
             {/* --- The PDF Viewer Container --- */}
             <div className="mb-6 overflow-hidden rounded-xl border border-gray-200 bg-gray-900 shadow-sm">
-                <iframe 
-                    src={note.pdf?.url ? `${note.pdf.url}#view=FitH` : ""} 
-                    title={note.title}
-                    className="h-[70vh] w-full border-0 bg-white"
-                    allowFullScreen
-                />
+            <iframe 
+                src={note.pdf?.url ? `https://docs.google.com/viewer?url=${encodeURIComponent(note.pdf.url)}&embedded=true` : ""} 
+                title={note.title}
+                className="h-[70vh] w-full border-0 bg-white"
+                allowFullScreen
+            />
                 
                 <div className="flex items-center justify-between bg-gray-900 px-4 py-3 text-white">
                     <span className="text-sm font-medium">Document Preview</span>
