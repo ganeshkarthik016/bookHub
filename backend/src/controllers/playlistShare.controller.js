@@ -43,7 +43,7 @@ const shareToUser = asyncHandler(async (req, res) => {
     if (!playlist) {
         throw new apiError(404, "Playlist not found");
     }
-    if (playlist.owner.toString() !== req.user._id.toString()) {
+    if (playlist.owner._id.toString() !== req.user._id.toString()) {
         throw new apiError(403, "Only the playlist owner can invite collaborators");
     }
     const targetUser = await User.findOne({
@@ -105,7 +105,7 @@ const getMembers = asyncHandler(async (req, res) => {
     }
     if (
         playlist.isPrivate &&
-        playlist.owner.toString() !== req.user._id.toString() &&
+        playlist.owner._id.toString() !== req.user._id.toString() &&
         !(await isAuthorizedViewer(playlistId, req.user._id))
     ) {
         throw new apiError(403, "You do not have permission to view this playlist's members");
@@ -184,7 +184,7 @@ const updateMemberRole = asyncHandler(async (req, res) => {
         throw new apiError(404, "Playlist not found");
     }
 
-    if (playlist.owner.toString() !== req.user._id.toString()) {
+    if (playlist.owner._id.toString() !== req.user._id.toString()) {
         throw new apiError(403, "Only the playlist owner can update member roles");
     }
 
@@ -233,7 +233,7 @@ const removeMember = asyncHandler(async (req, res) => {
     if (!playlist) {
         throw new apiError(404, "Playlist not found");
     }
-    if (playlist.owner.toString() !== req.user._id.toString()) {
+    if (playlist.owner._id.toString() !== req.user._id.toString()) {
         throw new apiError(403, "Only the playlist owner can remove collaborators");
     }
     if (!userId) {
@@ -279,7 +279,7 @@ const leavePlaylist = asyncHandler(async (req, res) => {
     if (!playlist) {
         throw new apiError(404, "Playlist not found");
     }
-    if (userId === playlist.owner.toString()) {
+    if (userId === playlist.owner._id.toString()) {
         throw new apiError(403, "You can't leave the playlist you created")
     }
     const member = await PlaylistMember.findOneAndDelete({

@@ -37,6 +37,10 @@ io.on("connection", (socket) => {
     console.log(`User connected: ${socket.id}`);
 
     socket.on("register", (userId) => {
+        if (!userId) {
+            console.log(`Socket ${socket.id} attempted to register without a userId`);
+            return; 
+        }
         socket.join(userId.toString());
         console.log(`Socket ${socket.id} joined room ${userId}`);
     });

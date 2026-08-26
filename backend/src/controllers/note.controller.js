@@ -106,7 +106,7 @@ const updateNoteDetails = asyncHandler(async (req, res) => {
     if (!note) {
         throw new apiError(404, "Note not found")
     }
-    if (note.owner.toString() !== req.user._id.toString()) {
+    if (note.owner._id.toString() !== req.user._id.toString()) {
         throw new apiError(403, "You are not authorized to update this note")
     }
     note.title = title?.trim();
@@ -155,7 +155,7 @@ const updateNote = asyncHandler(async (req, res) => {
     if (!note) {
         throw new apiError(404, "Note not found");
     }
-    if (note.owner.toString() !== req.user._id.toString()) {
+    if (note.owner._id.toString() !== req.user._id.toString()) {
         throw new apiError(403, "You are not authorized");
     }
     let uploadedPdf = null;
@@ -237,13 +237,13 @@ const getCurrentNote = asyncHandler(async (req, res) => {
 
     if (
         note.isPrivate &&
-        note.owner.toString() !== req.user._id.toString()
+        note.owner._id.toString() !== req.user._id.toString()
     ) {
         throw new apiError(403, "Unauthorized");
     }
 
     // Increment only if viewer isn't the owner
-    if (note.owner.toString() !== req.user._id.toString()) {
+    if (note.owner._id.toString() !== req.user._id.toString()) {
         note.views += 1;
         await note.save({ validateBeforeSave: false });
     }
@@ -453,7 +453,7 @@ const downloadNote = asyncHandler(async (req, res) => {
         throw new apiError(404, "Note not found");
     }
 
-    if (note.isPrivate && note.owner.toString() !== req.user._id.toString()) {
+    if (note.isPrivate && note.owner._id.toString() !== req.user._id.toString()) {
         throw new apiError(403, "Unauthorized");
     }
 
@@ -479,7 +479,7 @@ const deleteNote = asyncHandler(async (req, res) => {
         throw new apiError(404, "Note not found");
     }
 
-    if (req.user._id.toString() !== note.owner.toString()) {
+    if (req.user._id.toString() !== note.owner._id.toString()) {
         throw new apiError(403, "You are not authorized to delete this note");
     }
 

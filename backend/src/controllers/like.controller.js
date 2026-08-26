@@ -49,7 +49,7 @@ const toggleLike = asyncHandler(async (req, res) => {
        $inc: { likesCount: 1 } 
     });
 
-    if (note.owner.toString() !== req.user._id.toString()) {
+    if (note.owner._id.toString() !== req.user._id.toString()) {
         await sendNotification({
             senderId: req.user._id,
             receiverId: note.owner,
