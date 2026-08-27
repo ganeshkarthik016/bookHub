@@ -13,7 +13,17 @@ This is the React frontend for BookHub, built using Vite for blazing-fast develo
 - **Forms & Validation:** React Hook Form
 - **API Communication:** Axios
 - **Real-time:** Socket.IO Client
-- **Rich Text Editor:** TinyMCE
+
+---
+
+## ✨ Implemented Features
+
+- **Authentication & account:** registration/login, JWT access-token refresh, logout, OTP email verification, OTP password reset, password change, Gmail change, profile updates, profile-picture updates, and account deletion.
+- **Notes & discovery:** PDF and cover-image upload, note detail/file editing, public/private visibility, search, download, deletion, likes, comments, user search, and profiles.
+- **Connections:** follow/unfollow controls, follower/following lists, mutual friends, and follow suggestions.
+- **Playlists:** create, edit, delete, public/private playlists, item ordering, member management, and Owner/Editor/Viewer sharing permissions. Editors can add notes to shared playlists; viewers are shown as read-only.
+- **Notifications:** unread count, notification inbox, read/delete actions, and live Socket.IO notifications.
+- **Written notes:** owner-only content editing, background-generated PDFs, PDF status states, and generated-PDF viewing/downloading without exposing the editable content to other users.
 
 ---
 

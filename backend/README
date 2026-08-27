@@ -44,6 +44,8 @@ backend/
 - **Authentication & Security:** JWT, bcrypt, rate-limiting
 - **Email Services:** Nodemailer (OTPs & Verification)
 - **File Uploads:** Multer
+- **File Storage:** Cloudinary
+- **Background Jobs:** BullMQ and PDFKit for written-note PDF generation
 - **Containerization:** Docker
 
 ---
@@ -91,6 +93,8 @@ Written notes are saved immediately and their PDFs are generated in the backgrou
 ```bash
 npm run worker
 ```
+
+The worker generates PDFs for written notes, uploads them to Cloudinary, and updates each note's PDF status (`PENDING`, `PROCESSING`, `READY`, or `FAILED`).
 
 ---
 
@@ -158,12 +162,17 @@ npm run worker
 - `GET /get-my-playlists` - Fetch user's own playlists[cite: 6]
 - `GET /get-playlist-items/:playlistId` - View notes inside a playlist[cite: 6]
 - `DELETE /delete-playlist/:playlistId` - Delete playlist[cite: 6]
+- `GET /get-user-playlists/:userName` - Fetch a user's public playlists
+- `GET /get-user-playlists-with-note-status/:noteId` - Fetch owned playlists with note status
+- `GET /is-note-present-in-playlist/:playlistId` - Check if a note is in a playlist
 - `POST /:playlistId/share` - Share a playlist with another user[cite: 7]
 - `GET /editor` / `GET /viewer` - Fetch shared playlists by role[cite: 7]
 - `GET /:playlistId/members` - View playlist members[cite: 7]
 - `PATCH /:playlistId/members/:userId` - Update a member's role[cite: 7]
 - `DELETE /:playlistId/members/:userId` - Remove a member[cite: 7]
 - `DELETE /:playlistId/leave` - Leave a shared playlist[cite: 7]
+
+Playlist owners can manage playlist details and members. Editors can add/remove and reorder notes; viewers can access shared playlists but cannot change their contents.
 
 ### 🔔 Notifications
 
@@ -173,6 +182,18 @@ npm run worker
 - `PATCH /read-all` - Mark all as read[cite: 5]
 - `PATCH /:notificationId/read` - Mark single notification as read[cite: 5]
 - `DELETE /:notificationId` - Remove a notification[cite: 5]
+
+Notifications are emitted to the recipient's Socket.IO room for live delivery. Redis stores notification counters and temporary OTP values.
+
+### ✍️ Written Notes / Blogs
+
+- `POST /` - Create a written note and queue PDF generation
+- `GET /` - Fetch the current user's written notes
+- `GET /:blogId` - Fetch a written note; non-owners receive metadata and the generated PDF URL, not editable content
+- `PATCH /:blogId` - Update a written note (owner only) and queue a new PDF when content changes
+- `DELETE /:blogId` - Delete a written note (owner only)
+
+Written-note PDFs are generated asynchronously, stored in Cloudinary, and are available for viewing or download once the status is `READY`.
 
 ---
 
