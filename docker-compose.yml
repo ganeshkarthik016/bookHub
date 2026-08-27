@@ -15,6 +15,21 @@ services:
       - mongo
       - redis
 
+  worker:
+    build: ./backend
+    env_file:
+      - ./backend/.env
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017
+      - REDIS_URL=redis://redis:6379
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    command: npm run worker
+    depends_on:
+      - mongo
+      - redis
+
   mongo:
     image: mongo:latest
     ports:
