@@ -8,20 +8,21 @@ It combines note sharing, social features, playlists, search, and real-time noti
 
 ## ✨ Features
 
-- 🔐 User registration, login, logout & session management
-- 📧 Email verification & Password reset via OTPs (Nodemailer)
-- 👤 User profiles with follow/unfollow functionality
-- 📝 Create, upload, read and manage study notes
-- 📄 PDF-based study material support
-- ✍️ Rich-text note writing with TinyMCE
+- 🔐 User registration, login, logout, JWT access/refresh-token sessions, and password changes
+- 📧 Gmail verification, password reset, and email changes via OTPs (Nodemailer)
+- 👤 Profile, account-detail, profile-picture, and account-deletion management
+- 📝 Upload, edit, replace, search, download, and delete PDF study notes with cover images
+- 📄 Public/private PDF-based study material support
+- ✍️ Written notes with owner-only editing and background PDF generation
 - ❤️ Like and unlike notes
 - 💬 Comment on notes
-- 📚 Create, manage, and collaborate on playlists
-- 🔗 Share playlists (Viewer/Editor roles)
+- 🤝 Follow users, browse followers/following, view friends, and receive follow suggestions
+- 📚 Create, edit, delete, reorder, and collaborate on public/private playlists
+- 🔗 Share playlists with Owner, Editor, and Viewer permissions
 - 🔎 Search notes and users
-- 🔔 Real-time notifications
-- 📊 Unread notification tracking
+- 🔔 Real-time notifications with unread/read management and deletion
 - ⚡ Real-time updates using Socket.IO
+- ☁️ Cloudinary storage for note assets and generated written-note PDFs
 - 🔄 Automatic access-token refresh
 - 🛡️ Protected and public routes
 
@@ -33,11 +34,9 @@ It combines note sharing, social features, playlists, search, and real-time noti
 
 - React, Vite, React Router
 - Redux Toolkit
-- React Hook Form
 - Tailwind CSS
 - Axios
 - Socket.IO Client
-- TinyMCE
 
 ### Backend
 
@@ -46,6 +45,7 @@ It combines note sharing, social features, playlists, search, and real-time noti
 - Redis
 - Socket.IO
 - JWT, bcrypt, Nodemailer
+- Multer, Cloudinary, BullMQ, PDFKit
 - Docker
 
 ---
@@ -100,11 +100,11 @@ BookHub/
 
 ## 🚀 Quick Start (Docker)
 
-Since this project includes a `docker-compose.yml` file, you can spin up the entire application environment (including databases) using Docker.
+Since this project includes a `docker-compose.yml` file, you can spin up the backend services, worker, and databases using Docker.
 
 1. Clone the repository:
    ```bash
-   git clone [https://github.com/ganeshkarthik016/bookHub.git](https://github.com/ganeshkarthik016/bookHub.git)
+   git clone https://github.com/ganeshkarthik016/bookHub.git
    cd bookHub
    ```
 2. Set up your `.env` files in both the `frontend` and `backend` directories (refer to their respective READMEs for required variables).
