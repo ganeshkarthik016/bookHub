@@ -4,12 +4,14 @@ import { Bell, CheckCheck } from "lucide-react";
 import { useSocket } from "../../../context/SocketContext";
 import { 
     getUnreadNotifications, 
+    getUnreadCount,
     markNotificationAsRead, 
     markAllNotificationsAsRead,
     deleteNotification 
 } from "../../../services/notification.service";
 import {
     setNotifications,
+    setUnreadCount,
     markNotificationRead,
     markAllNotificationsRead,
     removeNotification,
@@ -42,14 +44,21 @@ export default function NotificationDropdown() {
 
     useEffect(() => {
         const fetchInitialNotifications = async () => {
+            setIsLoading(true);
             try {
                 const data = await getUnreadNotifications(1, 20);
                 if (data) dispatch(setNotifications(data));
-            } catch (error) {
+            } catch {
                 console.error("Failed to fetch notifications");
+            } finally {
+                setIsLoading(false);
             }
         };
         fetchInitialNotifications();
+    }, [dispatch]);
+
+    useEffect(() => {
+        getUnreadCount().then((data) => dispatch(setUnreadCount(data?.count || 0))).catch(() => {});
     }, [dispatch]);
 
     useEffect(() => {
@@ -66,7 +75,7 @@ export default function NotificationDropdown() {
         dispatch(markNotificationRead(notificationId));
         try {
             await markNotificationAsRead(notificationId);
-        } catch (error) {
+        } catch {
             console.error("Failed to mark as read");
         }
     };
@@ -76,7 +85,7 @@ export default function NotificationDropdown() {
         dispatch(markAllNotificationsRead());
         try {
             await markAllNotificationsAsRead();
-        } catch (error) {
+        } catch {
             console.error("Failed to mark all as read");
         }
     };
@@ -85,7 +94,7 @@ export default function NotificationDropdown() {
         dispatch(removeNotification(notificationId));
         try {
             await deleteNotification(notificationId);
-        } catch (error) {
+        } catch {
             console.error("Failed to delete notification");
         }
     };

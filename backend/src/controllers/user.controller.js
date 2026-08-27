@@ -356,11 +356,24 @@ const updateProfilePic = asyncHandler(async (req, res) => {
 const changeGmail = asyncHandler(async (req, res) => {
     const { email } = req.body;
     const userId = req.user._id;
+    const normalizedEmail = email?.trim().toLowerCase();
+    if (!normalizedEmail) {
+        throw new apiError(400, "Email is required");
+    }
     const user = await User.findById(userId);
     if (!user) {
         throw new apiError(404, "User not found");
     }
-    user.email = email.trim().toLowerCase();
+
+    const existingUser = await User.findOne({
+        email: normalizedEmail,
+        _id: { $ne: userId },
+    });
+    if (existingUser) {
+        throw new apiError(409, "Email already exists");
+    }
+
+    user.email = normalizedEmail;
     user.refreshToken = "";
     user.isVerified = false;
     await user.save({ validateBeforeSave: false });

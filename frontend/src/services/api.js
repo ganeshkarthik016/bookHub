@@ -30,7 +30,8 @@ api.interceptors.response.use(
         if (
             error.response?.status !== 401 ||
             originalRequest._retry ||
-            originalRequest.url?.includes("/refresh-token")
+            originalRequest.url?.includes("/refresh-token") ||
+            error.response?.data?.message === "Invalid credentials"
         ) {
             return Promise.reject(error);
         }

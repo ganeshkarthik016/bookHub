@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { Loader2, Download, BookmarkPlus, Eye, Calendar, Edit } from "lucide-react";
-import { getCurrentNote, downloadNote, updateNoteDetails } from "../services/note.service";
+import { Loader2, Download, BookmarkPlus, Eye, Calendar, Edit, Trash2 } from "lucide-react";
+import { getCurrentNote, downloadNote, updateNoteDetails, updateNoteFiles, deleteNote } from "../services/note.service";
 import { openModal } from "../store/slices/uiSlice";
 import { setCurrentNote } from "../store/slices/noteSlice"; 
-import { LikeButton, FollowButton, CommentSection, Button, EmptyState, SaveToPlaylistModal } from "../components";
+import { LikeButton, FollowButton, CommentSection, Button, EmptyState, SaveToPlaylistModal, PeopleModal } from "../components";
 
 export default function NoteDetails() {
     const { noteId } = useParams();
@@ -19,6 +19,9 @@ export default function NoteDetails() {
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [editData, setEditData] = useState({ title: "", description: "", tags: "", isPrivate: false });
+    const [pdfFile, setPdfFile] = useState(null);
+    const [coverImage, setCoverImage] = useState(null);
+    const [showLikes, setShowLikes] = useState(false);
 
     useEffect(() => {
         const fetchNote = async () => {
@@ -63,10 +66,24 @@ export default function NoteDetails() {
         setIsSaving(true);
         try {
             const updated = await updateNoteDetails(noteId, editData);
-            setNote((current) => ({ ...current, ...updated, owner: current.owner }));
+            let nextNote = { ...note, ...updated, owner: note.owner };
+            if (pdfFile || coverImage) {
+                const files = new FormData();
+                if (pdfFile) files.append("pdf", pdfFile);
+                if (coverImage) files.append("coverImage", coverImage);
+                nextNote = { ...nextNote, ...(await updateNoteFiles(noteId, files)), owner: note.owner };
+            }
+            setNote(nextNote);
+            setPdfFile(null); setCoverImage(null);
             setIsEditing(false);
         } catch (err) { setError(err.message || "Failed to update note."); }
         finally { setIsSaving(false); }
+    };
+
+    const handleDelete = async () => {
+        if (!window.confirm("Delete this note? This cannot be undone.")) return;
+        try { await deleteNote(noteId); window.location.assign("/notes"); }
+        catch (err) { setError(err.message || "Failed to delete note."); }
     };
 
     if (isLoading) {
@@ -109,6 +126,7 @@ export default function NoteDetails() {
                             initialIsLiked={note.isLiked} 
                             initialLikesCount={note.likesCount} 
                         />
+                        <button type="button" onClick={() => setShowLikes(true)} className="text-xs font-medium text-gray-500 hover:text-blue-600">Liked by</button>
                         <button 
                             onClick={() => dispatch(openModal("SAVE_TO_PLAYLIST"))}
                             className="flex items-center justify-center rounded-full bg-gray-100 p-2 text-gray-600 transition-colors hover:bg-gray-200 hover:text-gray-900"
@@ -116,7 +134,7 @@ export default function NoteDetails() {
                         >
                             <BookmarkPlus className="h-5 w-5" />
                         </button>
-                        {isOwner && <button onClick={() => setIsEditing((value) => !value)} className="flex items-center justify-center rounded-full bg-gray-100 p-2 text-gray-600 hover:bg-gray-200" title="Edit note"><Edit className="h-5 w-5" /></button>}
+                        {isOwner && <><button onClick={() => setIsEditing((value) => !value)} className="flex items-center justify-center rounded-full bg-gray-100 p-2 text-gray-600 hover:bg-gray-200" title="Edit note"><Edit className="h-5 w-5" /></button><button onClick={handleDelete} className="flex items-center justify-center rounded-full bg-red-50 p-2 text-red-600 hover:bg-red-100" title="Delete note"><Trash2 className="h-5 w-5" /></button></>}
                     </div>
                 </div>
 
@@ -124,6 +142,7 @@ export default function NoteDetails() {
                     <input value={editData.title} onChange={(e) => setEditData({ ...editData, title: e.target.value })} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" placeholder="Title" />
                     <textarea value={editData.description} onChange={(e) => setEditData({ ...editData, description: e.target.value })} rows="3" className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" placeholder="Description" />
                     <input value={editData.tags} onChange={(e) => setEditData({ ...editData, tags: e.target.value })} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" placeholder="Tags separated by commas" />
+                    <div className="grid gap-3 sm:grid-cols-2"><label className="text-sm text-gray-600">Replace PDF<input type="file" accept="application/pdf" onChange={(e) => setPdfFile(e.target.files[0])} className="mt-1 block w-full text-xs" /></label><label className="text-sm text-gray-600">Replace cover image<input type="file" accept="image/*" onChange={(e) => setCoverImage(e.target.files[0])} className="mt-1 block w-full text-xs" /></label></div>
                     <label className="flex items-center gap-2 text-sm text-gray-600"><input type="checkbox" checked={editData.isPrivate} onChange={(e) => setEditData({ ...editData, isPrivate: e.target.checked })} /> Make this note private</label>
                     <div className="flex gap-2"><Button type="submit" disabled={isSaving}>{isSaving ? "Saving..." : "Save changes"}</Button><Button type="button" bgColor="bg-gray-100" textColor="text-gray-700" onClick={() => setIsEditing(false)}>Cancel</Button></div>
                 </form>}
@@ -200,6 +219,7 @@ export default function NoteDetails() {
             
             {/* Mounting the modal locally so it easily receives the note._id prop */}
             <SaveToPlaylistModal noteId={note._id} />
+            <PeopleModal isOpen={showLikes} onClose={() => setShowLikes(false)} mode="likes" noteId={note._id} />
 
         </div>
     );

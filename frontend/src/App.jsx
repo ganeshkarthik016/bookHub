@@ -25,6 +25,9 @@ import MyPlaylists from "./pages/MyPlaylists";
 import MyWrittenNotes from "./pages/MyWrittenNotes";
 import WrittenNoteDetails from "./pages/WrittenNoteDetails";
 import NotFound from "./pages/NotFound";
+import EmailVerification from "./pages/EmailVerification";
+import AccountSettings from "./pages/AccountSettings";
+import Activity from "./pages/Activity";
 
 function App() {
     const dispatch = useDispatch();
@@ -40,7 +43,7 @@ function App() {
                 } else {
                     dispatch(logout()); // CHANGED
                 }
-            } catch (error) {
+            } catch {
                 dispatch(logout()); // CHANGED
             } finally {
                 setIsCheckingAuth(false);
@@ -87,6 +90,9 @@ function App() {
                     <Route path="/playlists" element={<MyPlaylists />} />
                     <Route path="/written-notes" element={<MyWrittenNotes />} />
                     <Route path="/written-notes/:blogId" element={<WrittenNoteDetails />} />
+                    <Route path="/verify-email" element={<EmailVerification />} />
+                    <Route path="/settings" element={<AccountSettings />} />
+                    <Route path="/activity" element={<Activity />} />
                     
                     {/* Dynamic Routes */}
                     <Route path="/profile/:userName" element={<Profile />} />

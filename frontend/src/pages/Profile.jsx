@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { Loader2, FileText, ListMusic, MapPin, Link as LinkIcon, Calendar } from "lucide-react";
+import { Loader2, FileText, ListMusic, Calendar } from "lucide-react";
 import { getUserProfile } from "../services/user.service";
 import { getUserNotes } from "../services/note.service";
 import { getUserPlaylists } from "../services/playlist.service";
 import { openModal } from "../store/slices/uiSlice";
-import { NoteCard, PlaylistCard, FollowButton, EmptyState, Button } from "../components";
+import { NoteCard, PlaylistCard, FollowButton, EmptyState, Button, PeopleModal } from "../components";
 
 export default function Profile() {
     const { userName } = useParams();
@@ -20,6 +20,7 @@ export default function Profile() {
     const [activeTab, setActiveTab] = useState("notes"); // 'notes' or 'playlists'
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
+    const [peopleModal, setPeopleModal] = useState(null);
 
     // Check if the current logged-in user is viewing their own profile
     const isOwnProfile = currentUser?.userName === userName;
@@ -130,12 +131,12 @@ export default function Profile() {
 
                         {/* Stats */}
                         <div className="mt-4 flex flex-wrap gap-4 text-sm text-gray-600">
-                            <div className="flex items-center gap-1">
+                            <button onClick={() => setPeopleModal("followers")} className="flex items-center gap-1 hover:text-blue-600">
                                 <span className="font-bold text-gray-900">{profile.followersCount}</span> Followers
-                            </div>
-                            <div className="flex items-center gap-1">
+                            </button>
+                            <button onClick={() => setPeopleModal("following")} className="flex items-center gap-1 hover:text-blue-600">
                                 <span className="font-bold text-gray-900">{profile.followingCount}</span> Following
-                            </div>
+                            </button>
                             <div className="flex items-center gap-1">
                                 <Calendar className="h-4 w-4 text-gray-400" />
                                 Joined {new Date(profile.createdAt).toLocaleDateString()}
@@ -205,6 +206,7 @@ export default function Profile() {
                     )
                 )}
             </div>
+            <PeopleModal isOpen={!!peopleModal} onClose={() => setPeopleModal(null)} mode={peopleModal} userId={profile._id} />
         </div>
     );
 }

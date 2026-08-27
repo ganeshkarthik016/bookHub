@@ -18,7 +18,7 @@ const loginUser = async (credentials) => {
             credentials
         );
 
-        return response.data.data;
+        return response.data.data.user;
     } catch (error) {
         handleError(error);
     }

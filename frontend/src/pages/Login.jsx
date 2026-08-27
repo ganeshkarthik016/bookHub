@@ -36,7 +36,7 @@ export default function Login() {
             
             if (loginData) {
                 dispatch(loginSuccess(loginData));
-                navigate("/"); 
+                navigate(loginData.isVerified ? "/" : "/verify-email");
             }
         } catch (err) {
             setError(err.message || "Invalid credentials");
