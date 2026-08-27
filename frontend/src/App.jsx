@@ -22,6 +22,8 @@ import NoteDetails from "./pages/NoteDetails";
 import PlaylistDetails from "./pages/PlaylistDetails";
 import MyNotes from "./pages/MyNotes";
 import MyPlaylists from "./pages/MyPlaylists";
+import MyWrittenNotes from "./pages/MyWrittenNotes";
+import WrittenNoteDetails from "./pages/WrittenNoteDetails";
 import NotFound from "./pages/NotFound";
 
 function App() {
@@ -83,6 +85,8 @@ function App() {
                     <Route path="/inbox" element={<Inbox />} />
                     <Route path="/notes" element={<MyNotes />} />
                     <Route path="/playlists" element={<MyPlaylists />} />
+                    <Route path="/written-notes" element={<MyWrittenNotes />} />
+                    <Route path="/written-notes/:blogId" element={<WrittenNoteDetails />} />
                     
                     {/* Dynamic Routes */}
                     <Route path="/profile/:userName" element={<Profile />} />

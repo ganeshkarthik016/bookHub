@@ -15,6 +15,9 @@ const toggleLike = asyncHandler(async (req, res) => {
     if (!note) {
         throw new apiError(404, "Note not found");
     }
+    if (note.isPrivate && note.owner.toString() !== req.user._id.toString()) {
+        throw new apiError(403, "You cannot like a private note");
+    }
 
     const existingLike = await Like.findOne({
         user: req.user._id,
@@ -49,7 +52,7 @@ const toggleLike = asyncHandler(async (req, res) => {
        $inc: { likesCount: 1 } 
     });
 
-    if (note.owner.toString() !== req.user._id.toString()) {
+    if (note.owner._id.toString() !== req.user._id.toString()) {
         await sendNotification({
             senderId: req.user._id,
             receiverId: note.owner,

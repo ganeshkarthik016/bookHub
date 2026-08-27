@@ -84,6 +84,14 @@ Populate your `.env` with the necessary keys (MongoDB URI, Redis host/port, JWT 
 npm run dev
 ```
 
+### Written-note PDF worker
+
+Written notes are saved immediately and their PDFs are generated in the background. Run this in a second terminal alongside the API server:
+
+```bash
+npm run worker
+```
+
 ---
 
 ## 🔗 Main API Routes

@@ -37,6 +37,10 @@ io.on("connection", (socket) => {
     console.log(`User connected: ${socket.id}`);
 
     socket.on("register", (userId) => {
+        if (!userId) {
+            console.log(`Socket ${socket.id} attempted to register without a userId`);
+            return; 
+        }
         socket.join(userId.toString());
         console.log(`Socket ${socket.id} joined room ${userId}`);
     });
@@ -78,6 +82,9 @@ app.use("/api/v1/playlistShares", playlistShareRouter)
 import notificationRouter from './routes/notifications.route.js';
 
 app.use("/api/v1/notifications", notificationRouter);
+
+import blogRouter from './routes/blog.route.js';
+app.use("/api/v1/blogs", blogRouter);
 
 app.get("/health", (req, res) => {
     res.json({

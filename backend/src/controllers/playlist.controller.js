@@ -58,7 +58,11 @@ const createPlaylist = asyncHandler(async (req, res) => {
 
 const addToPlatlistToggel = asyncHandler(async (req, res) => {
     const { playlistId } = req.params;
-    const { noteId } = req.body;
+    const noteId = req.query.noteId || req.body.noteId;
+
+    if (!noteId) {
+        throw new apiError(400, "noteId is required");
+    }
 
     const playlist = await Playlist.findById(playlistId);
     if (!playlist) {
@@ -70,7 +74,7 @@ const addToPlatlistToggel = asyncHandler(async (req, res) => {
         throw new apiError(404, "Note not found");
     }
 
-    if (playlist.owner.toString() !== req.user._id.toString()) {
+    if (playlist.owner._id.toString() !== req.user._id.toString()) {
         const isEditor = await isAuthorizedEditor(playlistId, req.user._id);
         if (!isEditor) {
             throw new apiError(403, "You do not have permission to edit this playlist");
@@ -128,7 +132,7 @@ const getPlaylist = asyncHandler(async (req, res) => {
         throw new apiError(404, "Playlist not found");
     }
 
-    if (playlist.isPrivate && playlist.owner.toString() !== req.user._id.toString()) {
+    if (playlist.isPrivate && playlist.owner._id.toString() !== req.user._id.toString()) {
         const isMember = await PlaylistMember.findOne({
             playlist: playlistId,
             user: req.user._id
@@ -235,7 +239,7 @@ const getPlaylistItems = asyncHandler(async (req, res) => {
         throw new apiError(404, "Playlist not found");
     }
 
-    if (playlist.isPrivate && playlist.owner.toString() !== req.user._id.toString()) {
+    if (playlist.isPrivate && playlist.owner._id.toString() !== req.user._id.toString()) {
         const isMember = await PlaylistMember.findOne({
             playlist: playlistId,
             user: req.user._id
@@ -264,7 +268,11 @@ const getPlaylistItems = asyncHandler(async (req, res) => {
 
 const isNotePresentInPlaylist = asyncHandler(async (req, res) => {
     const { playlistId } = req.params;
-    const { noteId } = req.body;
+    const noteId = req.query.noteId || req.body.noteId;
+
+    if (!noteId) {
+        throw new apiError(400, "noteId is required");
+    }
 
     const playlist = await Playlist.findById(playlistId);
     if (!playlist) {
@@ -276,7 +284,7 @@ const isNotePresentInPlaylist = asyncHandler(async (req, res) => {
     }
     if (
         playlist.isPrivate &&
-        playlist.owner.toString() !== req.user._id.toString() &&
+        playlist.owner._id.toString() !== req.user._id.toString() &&
         !(await isAuthorizedViewer(playlistId, req.user._id))) {
         throw new apiError(403, "You are not authorized to view this playlist");
     }
@@ -305,7 +313,7 @@ const editPlaylist = asyncHandler(async (req, res) => {
         throw new apiError(404, "Playlist not found");
     }
 
-    if (playlist.owner.toString() !== req.user._id.toString()) {
+    if (playlist.owner._id.toString() !== req.user._id.toString()) {
         throw new apiError(403, "You are not authorized to edit this playlist");
     }
 
@@ -353,7 +361,7 @@ const editPlaylistItemOrder = asyncHandler(async (req, res) => {
         throw new apiError(404, "Playlist not found");
     }
 
-    if (playlist.owner.toString() !== req.user._id.toString()) {
+    if (playlist.owner._id.toString() !== req.user._id.toString()) {
         const isEditor = await isAuthorizedEditor(playlistId, req.user._id);
         if (!isEditor) {
             throw new apiError(403, "You are not authorized to edit this playlist");
@@ -389,7 +397,7 @@ const deletePlaylist = asyncHandler(async (req, res) => {
         throw new apiError(404, "Playlist not found");
     }
 
-    if (playlist.owner.toString() !== req.user._id.toString()) {
+    if (playlist.owner._id.toString() !== req.user._id.toString()) {
         throw new apiError(403, "You are not authorized to delete this playlist");
     }
 

@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { Home, FileText, ListMusic, Inbox, X } from "lucide-react";
+import { Home, FileText, ListMusic, Inbox, X, PenLine } from "lucide-react";
 import { toggleSidebar } from "../../../store/slices/uiSlice.js";
 
 export default function Sidebar() {
@@ -10,6 +10,7 @@ export default function Sidebar() {
     const navItems = [
         { name: "Home", path: "/", icon: Home },
         { name: "Notes", path: "/notes", icon: FileText },
+        { name: "Written Notes", path: "/written-notes", icon: PenLine },
         { name: "Playlists", path: "/playlists", icon: ListMusic },
         { name: "Inbox", path: "/inbox", icon: Inbox },
     ];

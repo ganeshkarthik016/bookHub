@@ -22,6 +22,9 @@ const addComment = asyncHandler(async (req, res) => {
     if (!note) {
         throw new apiError(404, "Note not found");
     }
+    if (note.isPrivate && note.owner.toString() !== req.user._id.toString()) {
+        throw new apiError(403, "You cannot comment on a private note");
+    }
 
     const comment = await Comment.create({
         text: text.trim(),
@@ -29,7 +32,7 @@ const addComment = asyncHandler(async (req, res) => {
         note: noteId,
     });
 
-    if (note.owner.toString() !== req.user._id.toString()) {
+    if (note.owner._id.toString() !== req.user._id.toString()) {
         await sendNotification({
             senderId: req.user._id,
             receiverId: note.owner,
@@ -63,7 +66,7 @@ const getNoteComments = asyncHandler(async (req, res) => {
 
     if (
         note.isPrivate &&
-        note.owner.toString() !== req.user._id.toString()
+        note.owner._id.toString() !== req.user._id.toString()
     ) {
         throw new apiError(403, "You are not authorized");
     }
