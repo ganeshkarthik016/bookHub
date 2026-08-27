@@ -115,9 +115,9 @@ export const getUserPlaylists = async (userName) => {
     } catch (error) { handleError(error); }
 };
 
-export const isNotePresentInPlaylist = async (playlistId) => {
+export const isNotePresentInPlaylist = async (playlistId, noteId) => {
     try {
-        const response = await api.get(`/playlists/is-note-present-in-playlist/${playlistId}`); 
+        const response = await api.get(`/playlists/is-note-present-in-playlist/${playlistId}`, { params: { noteId } });
         return response.data.data;
     } catch (error) { handleError(error); }
 };

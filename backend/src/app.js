@@ -83,6 +83,9 @@ import notificationRouter from './routes/notifications.route.js';
 
 app.use("/api/v1/notifications", notificationRouter);
 
+import blogRouter from './routes/blog.route.js';
+app.use("/api/v1/blogs", blogRouter);
+
 app.get("/health", (req, res) => {
     res.json({
         status: "ok"

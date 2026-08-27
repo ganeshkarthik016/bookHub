@@ -58,7 +58,11 @@ const createPlaylist = asyncHandler(async (req, res) => {
 
 const addToPlatlistToggel = asyncHandler(async (req, res) => {
     const { playlistId } = req.params;
-    const { noteId } = req.body;
+    const noteId = req.query.noteId || req.body.noteId;
+
+    if (!noteId) {
+        throw new apiError(400, "noteId is required");
+    }
 
     const playlist = await Playlist.findById(playlistId);
     if (!playlist) {
@@ -264,7 +268,11 @@ const getPlaylistItems = asyncHandler(async (req, res) => {
 
 const isNotePresentInPlaylist = asyncHandler(async (req, res) => {
     const { playlistId } = req.params;
-    const { noteId } = req.body;
+    const noteId = req.query.noteId || req.body.noteId;
+
+    if (!noteId) {
+        throw new apiError(400, "noteId is required");
+    }
 
     const playlist = await Playlist.findById(playlistId);
     if (!playlist) {

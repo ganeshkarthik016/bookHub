@@ -22,6 +22,9 @@ const addComment = asyncHandler(async (req, res) => {
     if (!note) {
         throw new apiError(404, "Note not found");
     }
+    if (note.isPrivate && note.owner.toString() !== req.user._id.toString()) {
+        throw new apiError(403, "You cannot comment on a private note");
+    }
 
     const comment = await Comment.create({
         text: text.trim(),

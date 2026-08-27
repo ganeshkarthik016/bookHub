@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { Loader2, Download, BookmarkPlus, Eye, Calendar } from "lucide-react";
-import { getCurrentNote, downloadNote } from "../services/note.service";
+import { Loader2, Download, BookmarkPlus, Eye, Calendar, Edit } from "lucide-react";
+import { getCurrentNote, downloadNote, updateNoteDetails } from "../services/note.service";
 import { openModal } from "../store/slices/uiSlice";
 import { setCurrentNote } from "../store/slices/noteSlice"; 
 import { LikeButton, FollowButton, CommentSection, Button, EmptyState, SaveToPlaylistModal } from "../components";
@@ -16,6 +16,9 @@ export default function NoteDetails() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
     const [isDownloading, setIsDownloading] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [editData, setEditData] = useState({ title: "", description: "", tags: "", isPrivate: false });
 
     useEffect(() => {
         const fetchNote = async () => {
@@ -24,6 +27,7 @@ export default function NoteDetails() {
             try {
                 const data = await getCurrentNote(noteId);
                 setNote(data);
+                setEditData({ title: data.title, description: data.description || "", tags: (data.tags || []).join(", "), isPrivate: data.isPrivate });
                 // Dispatch to Redux so the rest of the app knows what note we are looking at!
                 dispatch(setCurrentNote(data)); 
             } catch (err) {
@@ -46,11 +50,23 @@ export default function NoteDetails() {
                 window.open(data.downloadUrl, "_blank");
                 setNote(prev => ({ ...prev, downloads: prev.downloads + 1 }));
             }
-        } catch (err) {
+        } catch {
             console.error("Failed to download note");
         } finally {
             setIsDownloading(false);
         }
+    };
+
+    const handleSave = async (event) => {
+        event.preventDefault();
+        if (!editData.title.trim()) return setError("Note title is required.");
+        setIsSaving(true);
+        try {
+            const updated = await updateNoteDetails(noteId, editData);
+            setNote((current) => ({ ...current, ...updated, owner: current.owner }));
+            setIsEditing(false);
+        } catch (err) { setError(err.message || "Failed to update note."); }
+        finally { setIsSaving(false); }
     };
 
     if (isLoading) {
@@ -81,7 +97,7 @@ export default function NoteDetails() {
             <div className="mb-6 flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
                 
                 <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                    <div>
+                    <div className="flex-1">
                         <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{note.title}</h1>
                         <p className="mt-2 text-gray-600 whitespace-pre-wrap">{note.description}</p>
                     </div>
@@ -100,8 +116,17 @@ export default function NoteDetails() {
                         >
                             <BookmarkPlus className="h-5 w-5" />
                         </button>
+                        {isOwner && <button onClick={() => setIsEditing((value) => !value)} className="flex items-center justify-center rounded-full bg-gray-100 p-2 text-gray-600 hover:bg-gray-200" title="Edit note"><Edit className="h-5 w-5" /></button>}
                     </div>
                 </div>
+
+                {isEditing && <form onSubmit={handleSave} className="space-y-3 rounded-lg border border-blue-100 bg-blue-50/40 p-4">
+                    <input value={editData.title} onChange={(e) => setEditData({ ...editData, title: e.target.value })} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" placeholder="Title" />
+                    <textarea value={editData.description} onChange={(e) => setEditData({ ...editData, description: e.target.value })} rows="3" className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" placeholder="Description" />
+                    <input value={editData.tags} onChange={(e) => setEditData({ ...editData, tags: e.target.value })} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" placeholder="Tags separated by commas" />
+                    <label className="flex items-center gap-2 text-sm text-gray-600"><input type="checkbox" checked={editData.isPrivate} onChange={(e) => setEditData({ ...editData, isPrivate: e.target.checked })} /> Make this note private</label>
+                    <div className="flex gap-2"><Button type="submit" disabled={isSaving}>{isSaving ? "Saving..." : "Save changes"}</Button><Button type="button" bgColor="bg-gray-100" textColor="text-gray-700" onClick={() => setIsEditing(false)}>Cancel</Button></div>
+                </form>}
 
                 {/* Tags */}
                 {note.tags?.length > 0 && (
