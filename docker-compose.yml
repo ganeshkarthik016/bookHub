@@ -4,7 +4,7 @@ services:
     env_file:
       - ./backend/.env
     ports:
-      - "${PORT}:8000"
+      - "${PORT:-8000}:8000"
     environment:
       - MONGODB_URI=mongodb://mongo:27017
       - REDIS_URL=redis://redis:6379
@@ -33,14 +33,14 @@ services:
   mongo:
     image: mongo:latest
     ports:
-      - "${MONGO_PORT}:27017"
+      - "${MONGO_PORT:-27018}:27017"
     volumes:
       - mongo_data:/data/db
 
   redis:
     image: redis:alpine
     ports:
-      - "${REDIS_PORT}:6379"
+      - "${REDIS_PORT:-6379}:6379"
 
 volumes:
   mongo_data:
