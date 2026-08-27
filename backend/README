@@ -102,86 +102,86 @@ The worker generates PDFs for written notes, uploads them to Cloudinary, and upd
 
 ### 👤 Users & Authentication
 
-- `POST /register` - Register a new user with a profile picture[cite: 8]
-- `POST /login` - Authenticate user[cite: 8]
-- `POST /logout` - Secure logout[cite: 8]
-- `POST /refresh-token` - Refresh JWT access token[cite: 8]
-- `POST /send-verification-otp` - Send email verification OTP[cite: 8]
-- `POST /verify-email-otp` - Verify email[cite: 8]
-- `POST /forgot-password-otp` - Request password reset OTP[cite: 8]
-- `POST /verify-reset-password-otp` - Verify password reset[cite: 8]
-- `PATCH /change-password` - Change account password[cite: 8]
-- `PATCH /update-account-details` - Update text details[cite: 8]
-- `PATCH /update-profile-pic` - Update avatar image[cite: 8]
-- `PATCH /change-gmail` - Update account email[cite: 8]
-- `GET /get-current-user` - Fetch logged-in user data[cite: 8]
-- `GET /profile/:userName` - Fetch a user's public profile[cite: 8]
-- `GET /search` - Search for users[cite: 8]
-- `DELETE /delete-account` - Delete user account[cite: 8]
+- `POST /register` - Register a new user with a profile picture
+- `POST /login` - Authenticate user
+- `POST /logout` - Secure logout
+- `POST /refresh-token` - Refresh JWT access token
+- `POST /send-verification-otp` - Send email verification OTP
+- `POST /verify-email-otp` - Verify email
+- `POST /forgot-password-otp` - Request password reset OTP
+- `POST /verify-reset-password-otp` - Verify password reset
+- `PATCH /change-password` - Change account password
+- `PATCH /update-account-details` - Update text details
+- `PATCH /update-profile-pic` - Update avatar image
+- `PATCH /change-gmail` - Update account email
+- `GET /get-current-user` - Fetch logged-in user data
+- `GET /profile/:userName` - Fetch a user's public profile
+- `GET /search` - Search for users
+- `DELETE /delete-account` - Delete user account
 
 ### 📝 Notes
 
-- `POST /upload-notes` - Upload a new note (PDF + Cover Image)[cite: 4]
-- `PATCH /update-note-details/:noteId` - Update text info[cite: 4]
-- `PATCH /update-note/:noteId` - Update files (PDF/Image)[cite: 4]
-- `GET /get-current-note/:noteId` - Fetch specific note details[cite: 4]
-- `GET /get-my-notes` - Fetch logged-in user's notes[cite: 4]
-- `GET /get-user-notes/:userName` - Fetch specific user's public notes[cite: 4]
-- `GET /search-notes` - Search notes repository[cite: 4]
-- `GET /download-note/:noteId` - Generate a download link for a note[cite: 4]
-- `DELETE /delete-note/:noteId` - Remove a note[cite: 4]
+- `POST /upload-notes` - Upload a new note (PDF + Cover Image)
+- `PATCH /update-note-details/:noteId` - Update text info
+- `PATCH /update-note/:noteId` - Update files (PDF/Image)
+- `GET /get-current-note/:noteId` - Fetch specific note details
+- `GET /get-my-notes` - Fetch logged-in user's notes
+- `GET /get-user-notes/:userName` - Fetch specific user's public notes
+- `GET /search-notes` - Search notes repository
+- `GET /download-note/:noteId` - Generate a download link for a note
+- `DELETE /delete-note/:noteId` - Remove a note
 
 ### ❤️ Likes & 💬 Comments
 
-- `POST /toggle/:noteId` - Toggle like status on a note[cite: 3]
-- `GET /my-likes` - Get all notes liked by current user[cite: 3]
-- `GET /is-liked/:noteId` - Check if user liked a note[cite: 3]
-- `GET /note/:noteId` - Get all likes for a specific note[cite: 3]
-- `POST /add-comment/:noteId` - Add a comment to a note[cite: 1]
-- `GET /get-comments/:noteId` - Fetch comments for a note[cite: 1]
-- `PATCH /edit-comment/:commentId` - Edit a comment[cite: 1]
-- `DELETE /delete-comment/:commentId` - Delete a comment[cite: 1]
-- `GET /get-my-comments` - View all comments made by the user[cite: 1]
+- `POST /toggle/:noteId` - Toggle like status on a note
+- `GET /my-likes` - Get all notes liked by current user
+- `GET /is-liked/:noteId` - Check if user liked a note
+- `GET /note/:noteId` - Get all likes for a specific note
+- `POST /add-comment/:noteId` - Add a comment to a note
+- `GET /get-comments/:noteId` - Fetch comments for a note
+- `PATCH /edit-comment/:commentId` - Edit a comment
+- `DELETE /delete-comment/:commentId` - Delete a comment
+- `GET /get-my-comments` - View all comments made by the user
 
 ### 🤝 Connections (Followers)
 
-- `POST /toggle/:userId` - Follow/Unfollow a user[cite: 2]
-- `GET /is-following/:userId` - Check follow status[cite: 2]
-- `GET /followers/:userId` - Get user's followers list[cite: 2]
-- `GET /following/:userId` - Get accounts the user is following[cite: 2]
-- `GET /my-friends` - Get mutual connections[cite: 2]
-- `GET /suggestions` - Get follow recommendations[cite: 2]
+- `POST /toggle/:userId` - Follow/Unfollow a user
+- `GET /is-following/:userId` - Check follow status
+- `GET /followers/:userId` - Get user's followers list
+- `GET /following/:userId` - Get accounts the user is following
+- `GET /my-friends` - Get mutual connections
+- `GET /suggestions` - Get follow recommendations
 
 ### 📚 Playlists & Sharing
 
-- `POST /create` - Create a new playlist[cite: 6]
-- `POST /add-to-playlist/:playlistId` - Toggle note in a playlist[cite: 6]
-- `PATCH /edit-playlist/:playlistId` - Update playlist details[cite: 6]
-- `PATCH /edit-playlist-item-order/:playlistId` - Reorder notes[cite: 6]
-- `GET /get-playlist/:playlistId` - Fetch playlist details[cite: 6]
-- `GET /get-my-playlists` - Fetch user's own playlists[cite: 6]
-- `GET /get-playlist-items/:playlistId` - View notes inside a playlist[cite: 6]
-- `DELETE /delete-playlist/:playlistId` - Delete playlist[cite: 6]
+- `POST /create` - Create a new playlist
+- `POST /add-to-playlist/:playlistId` - Toggle note in a playlist
+- `PATCH /edit-playlist/:playlistId` - Update playlist details
+- `PATCH /edit-playlist-item-order/:playlistId` - Reorder notes
+- `GET /get-playlist/:playlistId` - Fetch playlist details
+- `GET /get-my-playlists` - Fetch user's own playlists
+- `GET /get-playlist-items/:playlistId` - View notes inside a playlist
+- `DELETE /delete-playlist/:playlistId` - Delete playlist
 - `GET /get-user-playlists/:userName` - Fetch a user's public playlists
 - `GET /get-user-playlists-with-note-status/:noteId` - Fetch owned playlists with note status
 - `GET /is-note-present-in-playlist/:playlistId` - Check if a note is in a playlist
-- `POST /:playlistId/share` - Share a playlist with another user[cite: 7]
-- `GET /editor` / `GET /viewer` - Fetch shared playlists by role[cite: 7]
-- `GET /:playlistId/members` - View playlist members[cite: 7]
-- `PATCH /:playlistId/members/:userId` - Update a member's role[cite: 7]
-- `DELETE /:playlistId/members/:userId` - Remove a member[cite: 7]
-- `DELETE /:playlistId/leave` - Leave a shared playlist[cite: 7]
+- `POST /:playlistId/share` - Share a playlist with another user
+- `GET /editor` / `GET /viewer` - Fetch shared playlists by role
+- `GET /:playlistId/members` - View playlist members
+- `PATCH /:playlistId/members/:userId` - Update a member's role
+- `DELETE /:playlistId/members/:userId` - Remove a member
+- `DELETE /:playlistId/leave` - Leave a shared playlist
 
 Playlist owners can manage playlist details and members. Editors can add/remove and reorder notes; viewers can access shared playlists but cannot change their contents.
 
 ### 🔔 Notifications
 
-- `GET /count` - Get unread notification count[cite: 5]
-- `GET /unread` - Fetch unread notifications[cite: 5]
-- `GET /` - Fetch all notifications[cite: 5]
-- `PATCH /read-all` - Mark all as read[cite: 5]
-- `PATCH /:notificationId/read` - Mark single notification as read[cite: 5]
-- `DELETE /:notificationId` - Remove a notification[cite: 5]
+- `GET /count` - Get unread notification count
+- `GET /unread` - Fetch unread notifications
+- `GET /` - Fetch all notifications
+- `PATCH /read-all` - Mark all as read
+- `PATCH /:notificationId/read` - Mark single notification as read
+- `DELETE /:notificationId` - Remove a notification
 
 Notifications are emitted to the recipient's Socket.IO room for live delivery. Redis stores notification counters and temporary OTP values.
 
