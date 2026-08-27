@@ -1,52 +1,125 @@
-# BookHub 📚
+# 📚 BookHub
 
-BookHub is a full-stack study and knowledge-sharing platform where students can create, upload, organize, discover, and interact with study material.
+**BookHub** is a full-stack study and knowledge-sharing platform where students can create, upload, organize, discover, and interact with study material — combining note sharing, social features, playlists, search, and real-time notifications into a single platform.
 
-It combines note sharing, social features, playlists, search, and real-time notifications into a single platform.
+[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://book-hub-ashy-six.vercel.app)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+[Live Demo](https://book-hub-ashy-six.vercel.app) · [Report a Bug](https://github.com/ganeshkarthik016/bookHub/issues) · [Request a Feature](https://github.com/ganeshkarthik016/bookHub/issues)
+
+---
+
+## Table of Contents
+
+- [Live Deployment](#-live-deployment)
+- [Features](#-features)
+- [Tech Stack](#️-tech-stack)
+- [Architecture](#️-architecture)
+- [Project Structure](#-project-structure)
+- [Quick Start](#-quick-start-docker)
+- [Goal](#-goal)
+- [License](#-license)
+
+---
+
+## 🌐 Live Deployment
+
+BookHub is deployed using managed cloud services in production.
+
+| Component     | Provider      | URL / Notes                                                          |
+| ------------- | ------------- | -------------------------------------------------------------------- |
+| Frontend      | Vercel        | [book-hub-ashy-six.vercel.app](https://book-hub-ashy-six.vercel.app) |
+| Backend API   | Render        | [bookhub-ywkk.onrender.com](https://bookhub-ywkk.onrender.com)       |
+| Database      | MongoDB Atlas | —                                                                    |
+| Cache / Queue | Render Redis  | Used for caching and BullMQ jobs                                     |
+| File Storage  | Cloudinary    | Notes, cover images, generated PDFs                                  |
+
+### Deployment Architecture
+
+```text
+                    ┌────────────────────────┐
+                    │   React Frontend       │
+                    │        Vercel          │
+                    └───────────┬────────────┘
+                                │
+                              HTTPS
+                                │
+                                ▼
+                    ┌────────────────────────┐
+                    │   Express Backend      │
+                    │        Render          │
+                    └───────┬────────┬───────┘
+                            │        │
+                  ┌─────────┘        └──────────┐
+                  ▼                             ▼
+        ┌──────────────────┐          ┌──────────────────┐
+        │  MongoDB Atlas   │          │   Render Redis   │
+        │    Database      │          │ Cache + BullMQ   │
+        └──────────────────┘          └────────┬─────────┘
+                                                │
+                                                ▼
+                                       ┌──────────────────┐
+                                       │   BullMQ Worker  │
+                                       │ Background Jobs  │
+                                       └────────┬─────────┘
+                                                │
+                                                ▼
+                                       ┌──────────────────┐
+                                       │    Cloudinary    │
+                                       │ Files + PDFs     │
+                                       └──────────────────┘
+```
 
 ---
 
 ## ✨ Features
 
-- 🔐 User registration, login, logout, JWT access/refresh-token sessions, and password changes
-- 📧 Gmail verification, password reset, and email changes via OTPs (Nodemailer)
-- 👤 Profile, account-detail, profile-picture, and account-deletion management
+**Authentication & Account**
+
+- 🔐 Registration, login, logout, and JWT access/refresh-token sessions
+- 📧 Gmail verification, password reset, and email changes via OTP (Nodemailer)
+- 👤 Profile, account details, profile picture, and account deletion management
+- 🔄 Automatic access-token refresh
+- 🛡️ Protected and public routes
+
+**Study Material**
+
 - 📝 Upload, edit, replace, search, download, and delete PDF study notes with cover images
 - 📄 Public/private PDF-based study material support
 - ✍️ Written notes with owner-only editing and background PDF generation
+
+**Social**
+
 - ❤️ Like and unlike notes
 - 💬 Comment on notes
 - 🤝 Follow users, browse followers/following, view friends, and receive follow suggestions
+
+**Playlists**
+
 - 📚 Create, edit, delete, reorder, and collaborate on public/private playlists
 - 🔗 Share playlists with Owner, Editor, and Viewer permissions
+
+**Discovery & Real-time**
+
 - 🔎 Search notes and users
 - 🔔 Real-time notifications with unread/read management and deletion
-- ⚡ Real-time updates using Socket.IO
+- ⚡ Real-time updates via Socket.IO
+
+**Infrastructure**
+
 - ☁️ Cloudinary storage for note assets and generated written-note PDFs
-- 🔄 Automatic access-token refresh
-- 🛡️ Protected and public routes
 
 ---
 
 ## 🛠️ Tech Stack
 
-### Frontend
-
-- React, Vite, React Router
-- Redux Toolkit
-- Tailwind CSS
-- Axios
-- Socket.IO Client
-
-### Backend
-
-- Node.js, Express.js
-- MongoDB, Mongoose
-- Redis
-- Socket.IO
-- JWT, bcrypt, Nodemailer
-- Multer, Cloudinary, BullMQ, PDFKit
-- Docker
+| Layer            | Technologies                                                                    |
+| ---------------- | ------------------------------------------------------------------------------- |
+| **Frontend**     | React, Vite, React Router, Redux Toolkit, Tailwind CSS, Axios, Socket.IO Client |
+| **Backend**      | Node.js, Express.js, MongoDB, Mongoose, Redis, Socket.IO                        |
+| **Auth & Mail**  | JWT, bcrypt, Nodemailer                                                         |
+| **Files & Jobs** | Multer, Cloudinary, BullMQ, PDFKit                                              |
+| **DevOps**       | Docker                                                                          |
 
 ---
 
@@ -94,7 +167,7 @@ BookHub/
 └── README.md              # Main project documentation
 ```
 
-> _Detailed setup instructions, folder structures, and API documentation are available in the [Frontend](https://github.com/ganeshkarthik016/bookHub/tree/main/frontend) and [Backend](https://github.com/ganeshkarthik016/bookHub/tree/main/backend) directories._
+> Detailed setup instructions, folder structures, and API documentation are available in the [Frontend](https://github.com/ganeshkarthik016/bookHub/tree/main/frontend) and [Backend](https://github.com/ganeshkarthik016/bookHub/tree/main/backend) directories.
 
 ---
 
@@ -102,16 +175,24 @@ BookHub/
 
 Since this project includes a `docker-compose.yml` file, you can spin up the backend services, worker, and databases using Docker.
 
-1. Clone the repository:
+1. **Clone the repository**
+
    ```bash
    git clone https://github.com/ganeshkarthik016/bookHub.git
    cd bookHub
    ```
-2. Set up your `.env` files in both the `frontend` and `backend` directories (refer to their respective READMEs for required variables).
-3. Start the application:
+
+2. **Configure environment variables**
+   Set up your `.env` files in both the `frontend` and `backend` directories. Refer to their respective READMEs for the required variables.
+
+3. **Start the application**
+
    ```bash
    docker-compose up -d --build
    ```
+
+4. **Open the app**
+   Once the containers are running, visit the frontend at `http://localhost:<port>` (see `frontend/README.md` for the configured port).
 
 ---
 
@@ -123,9 +204,12 @@ BookHub is being built as a practical full-stack application while exploring mod
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-Copyright (c) 2026 Ganesh Karthik
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+
+Copyright © 2026 Ganesh Karthik
 
 ---
 
-**BookHub** — _A study platform built for learning, sharing, and organizing knowledge._
+<p align="center">
+  <strong>BookHub</strong> — <em>A study platform built for learning, sharing, and organizing knowledge.</em>
+</p>

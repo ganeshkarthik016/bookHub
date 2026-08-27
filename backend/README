@@ -1,12 +1,47 @@
-# BookHub - Backend ⚙️
+# ⚙️ BookHub — Backend
 
-This is the Express.js and Node.js backend for BookHub. It handles user authentication, RESTful API endpoints for study materials, database connections (MongoDB), caching (Redis), and real-time communication via Socket.IO.
+The Express.js and Node.js backend for **BookHub**. It handles user authentication, RESTful API endpoints for study materials, database access (MongoDB), caching (Redis), background jobs (BullMQ), and real-time communication via Socket.IO.
+
+> Looking for the frontend? See the [Frontend README](../frontend/README.md).
+> Looking for the project overview? See the [Root README](../README.md).
+
+---
+
+## Table of Contents
+
+- [Tech Stack](#️-technologies-used)
+- [Folder Structure](#-folder-structure)
+- [Getting Started](#-getting-started)
+- [API Reference](#-main-api-routes)
+  - [Users & Authentication](#-users--authentication)
+  - [Notes](#-notes)
+  - [Likes & Comments](#️-likes---comments)
+  - [Connections (Followers)](#-connections-followers)
+  - [Playlists & Sharing](#-playlists--sharing)
+  - [Notifications](#-notifications)
+  - [Written Notes / Blogs](#️-written-notes--blogs)
+
+---
+
+## 🛠️ Technologies Used
+
+| Category                  | Technology                                   |
+| ------------------------- | -------------------------------------------- |
+| Runtime                   | Node.js                                      |
+| Framework                 | Express.js                                   |
+| Database                  | MongoDB & Mongoose                           |
+| Caching                   | Redis                                        |
+| Real-time                 | Socket.IO                                    |
+| Authentication & Security | JWT, bcrypt, rate-limiting                   |
+| Email Services            | Nodemailer (OTPs & verification)             |
+| File Uploads              | Multer                                       |
+| File Storage              | Cloudinary                                   |
+| Background Jobs           | BullMQ, PDFKit (written-note PDF generation) |
+| Containerization          | Docker                                       |
 
 ---
 
 ## 📂 Folder Structure
-
-Here is an overview of the backend directory structure and what each part does:
 
 ```text
 backend/
@@ -34,32 +69,16 @@ backend/
 
 ---
 
-## 🛠️ Technologies Used
-
-- **Runtime:** Node.js
-- **Framework:** Express.js
-- **Database:** MongoDB & Mongoose
-- **Caching:** Redis
-- **Real-time:** Socket.IO
-- **Authentication & Security:** JWT, bcrypt, rate-limiting
-- **Email Services:** Nodemailer (OTPs & Verification)
-- **File Uploads:** Multer
-- **File Storage:** Cloudinary
-- **Background Jobs:** BullMQ and PDFKit for written-note PDF generation
-- **Containerization:** Docker
-
----
-
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-Make sure you have the following installed on your machine:
+Make sure you have the following installed:
 
-- Node.js (v16 or higher recommended)
-- MongoDB (Local instance or MongoDB Atlas)
-- Redis (Local instance or cloud Redis)
-- Docker (Optional)
+- **Node.js** v16 or higher
+- **MongoDB** (local instance or MongoDB Atlas)
+- **Redis** (local instance or cloud Redis)
+- **Docker** (optional, for containerized setup)
 
 ### 1. Installation
 
@@ -76,25 +95,41 @@ Create a `.env` file in the root of the `backend` directory:
 cp .env.example .env
 ```
 
-Populate your `.env` with the necessary keys (MongoDB URI, Redis host/port, JWT secrets, Nodemailer credentials, etc.).
+Populate your `.env` with the necessary keys — MongoDB URI, Redis host/port, JWT secrets, Nodemailer credentials, Cloudinary credentials, etc. See `.env.example` for the full list of required variables.
 
 ### 3. Running the Server
 
-**Development Mode:**
+**Development mode** (with hot reload):
 
 ```bash
 npm run dev
 ```
 
-### Written-note PDF worker
+**Production mode:**
 
-Written notes are saved immediately and their PDFs are generated in the background. Run this in a second terminal alongside the API server:
+```bash
+npm start
+```
+
+### 4. Written-Note PDF Worker
+
+Written notes are saved immediately, and their PDFs are generated in the background. Run this in a second terminal alongside the API server:
 
 ```bash
 npm run worker
 ```
 
-The worker generates PDFs for written notes, uploads them to Cloudinary, and updates each note's PDF status (`PENDING`, `PROCESSING`, `READY`, or `FAILED`).
+The worker generates PDFs for written notes, uploads them to Cloudinary, and updates each note's PDF status: `PENDING` → `PROCESSING` → `READY` (or `FAILED`).
+
+### 5. Running with Docker (optional)
+
+From the repository root, where `docker-compose.yml` lives:
+
+```bash
+docker-compose up -d --build
+```
+
+This spins up the API server, the worker, and the required databases together. See the [root README](../README.md#-quick-start-docker) for details.
 
 ---
 
@@ -102,99 +137,115 @@ The worker generates PDFs for written notes, uploads them to Cloudinary, and upd
 
 ### 👤 Users & Authentication
 
-- `POST /register` - Register a new user with a profile picture
-- `POST /login` - Authenticate user
-- `POST /logout` - Secure logout
-- `POST /refresh-token` - Refresh JWT access token
-- `POST /send-verification-otp` - Send email verification OTP
-- `POST /verify-email-otp` - Verify email
-- `POST /forgot-password-otp` - Request password reset OTP
-- `POST /verify-reset-password-otp` - Verify password reset
-- `PATCH /change-password` - Change account password
-- `PATCH /update-account-details` - Update text details
-- `PATCH /update-profile-pic` - Update avatar image
-- `PATCH /change-gmail` - Update account email
-- `GET /get-current-user` - Fetch logged-in user data
-- `GET /profile/:userName` - Fetch a user's public profile
-- `GET /search` - Search for users
-- `DELETE /delete-account` - Delete user account
+| Method   | Endpoint                     | Description                                |
+| -------- | ---------------------------- | ------------------------------------------ |
+| `POST`   | `/register`                  | Register a new user with a profile picture |
+| `POST`   | `/login`                     | Authenticate user                          |
+| `POST`   | `/logout`                    | Secure logout                              |
+| `POST`   | `/refresh-token`             | Refresh JWT access token                   |
+| `POST`   | `/send-verification-otp`     | Send email verification OTP                |
+| `POST`   | `/verify-email-otp`          | Verify email                               |
+| `POST`   | `/forgot-password-otp`       | Request password reset OTP                 |
+| `POST`   | `/verify-reset-password-otp` | Verify password reset                      |
+| `PATCH`  | `/change-password`           | Change account password                    |
+| `PATCH`  | `/update-account-details`    | Update text details                        |
+| `PATCH`  | `/update-profile-pic`        | Update avatar image                        |
+| `PATCH`  | `/change-gmail`              | Update account email                       |
+| `GET`    | `/get-current-user`          | Fetch logged-in user data                  |
+| `GET`    | `/profile/:userName`         | Fetch a user's public profile              |
+| `GET`    | `/search`                    | Search for users                           |
+| `DELETE` | `/delete-account`            | Delete user account                        |
 
 ### 📝 Notes
 
-- `POST /upload-notes` - Upload a new note (PDF + Cover Image)
-- `PATCH /update-note-details/:noteId` - Update text info
-- `PATCH /update-note/:noteId` - Update files (PDF/Image)
-- `GET /get-current-note/:noteId` - Fetch specific note details
-- `GET /get-my-notes` - Fetch logged-in user's notes
-- `GET /get-user-notes/:userName` - Fetch specific user's public notes
-- `GET /search-notes` - Search notes repository
-- `GET /download-note/:noteId` - Generate a download link for a note
-- `DELETE /delete-note/:noteId` - Remove a note
+| Method   | Endpoint                       | Description                           |
+| -------- | ------------------------------ | ------------------------------------- |
+| `POST`   | `/upload-notes`                | Upload a new note (PDF + cover image) |
+| `PATCH`  | `/update-note-details/:noteId` | Update text info                      |
+| `PATCH`  | `/update-note/:noteId`         | Update files (PDF/image)              |
+| `GET`    | `/get-current-note/:noteId`    | Fetch specific note details           |
+| `GET`    | `/get-my-notes`                | Fetch logged-in user's notes          |
+| `GET`    | `/get-user-notes/:userName`    | Fetch specific user's public notes    |
+| `GET`    | `/search-notes`                | Search notes repository               |
+| `GET`    | `/download-note/:noteId`       | Generate a download link for a note   |
+| `DELETE` | `/delete-note/:noteId`         | Remove a note                         |
 
 ### ❤️ Likes & 💬 Comments
 
-- `POST /toggle/:noteId` - Toggle like status on a note
-- `GET /my-likes` - Get all notes liked by current user
-- `GET /is-liked/:noteId` - Check if user liked a note
-- `GET /note/:noteId` - Get all likes for a specific note
-- `POST /add-comment/:noteId` - Add a comment to a note
-- `GET /get-comments/:noteId` - Fetch comments for a note
-- `PATCH /edit-comment/:commentId` - Edit a comment
-- `DELETE /delete-comment/:commentId` - Delete a comment
-- `GET /get-my-comments` - View all comments made by the user
+| Method   | Endpoint                     | Description                         |
+| -------- | ---------------------------- | ----------------------------------- |
+| `POST`   | `/toggle/:noteId`            | Toggle like status on a note        |
+| `GET`    | `/my-likes`                  | Get all notes liked by current user |
+| `GET`    | `/is-liked/:noteId`          | Check if user liked a note          |
+| `GET`    | `/note/:noteId`              | Get all likes for a specific note   |
+| `POST`   | `/add-comment/:noteId`       | Add a comment to a note             |
+| `GET`    | `/get-comments/:noteId`      | Fetch comments for a note           |
+| `PATCH`  | `/edit-comment/:commentId`   | Edit a comment                      |
+| `DELETE` | `/delete-comment/:commentId` | Delete a comment                    |
+| `GET`    | `/get-my-comments`           | View all comments made by the user  |
 
 ### 🤝 Connections (Followers)
 
-- `POST /toggle/:userId` - Follow/Unfollow a user
-- `GET /is-following/:userId` - Check follow status
-- `GET /followers/:userId` - Get user's followers list
-- `GET /following/:userId` - Get accounts the user is following
-- `GET /my-friends` - Get mutual connections
-- `GET /suggestions` - Get follow recommendations
+| Method | Endpoint                | Description                        |
+| ------ | ----------------------- | ---------------------------------- |
+| `POST` | `/toggle/:userId`       | Follow/unfollow a user             |
+| `GET`  | `/is-following/:userId` | Check follow status                |
+| `GET`  | `/followers/:userId`    | Get user's followers list          |
+| `GET`  | `/following/:userId`    | Get accounts the user is following |
+| `GET`  | `/my-friends`           | Get mutual connections             |
+| `GET`  | `/suggestions`          | Get follow recommendations         |
 
 ### 📚 Playlists & Sharing
 
-- `POST /create` - Create a new playlist
-- `POST /add-to-playlist/:playlistId` - Toggle note in a playlist
-- `PATCH /edit-playlist/:playlistId` - Update playlist details
-- `PATCH /edit-playlist-item-order/:playlistId` - Reorder notes
-- `GET /get-playlist/:playlistId` - Fetch playlist details
-- `GET /get-my-playlists` - Fetch user's own playlists
-- `GET /get-playlist-items/:playlistId` - View notes inside a playlist
-- `DELETE /delete-playlist/:playlistId` - Delete playlist
-- `GET /get-user-playlists/:userName` - Fetch a user's public playlists
-- `GET /get-user-playlists-with-note-status/:noteId` - Fetch owned playlists with note status
-- `GET /is-note-present-in-playlist/:playlistId` - Check if a note is in a playlist
-- `POST /:playlistId/share` - Share a playlist with another user
-- `GET /editor` / `GET /viewer` - Fetch shared playlists by role
-- `GET /:playlistId/members` - View playlist members
-- `PATCH /:playlistId/members/:userId` - Update a member's role
-- `DELETE /:playlistId/members/:userId` - Remove a member
-- `DELETE /:playlistId/leave` - Leave a shared playlist
+| Method   | Endpoint                                       | Description                            |
+| -------- | ---------------------------------------------- | -------------------------------------- |
+| `POST`   | `/create`                                      | Create a new playlist                  |
+| `POST`   | `/add-to-playlist/:playlistId`                 | Toggle note in a playlist              |
+| `PATCH`  | `/edit-playlist/:playlistId`                   | Update playlist details                |
+| `PATCH`  | `/edit-playlist-item-order/:playlistId`        | Reorder notes                          |
+| `GET`    | `/get-playlist/:playlistId`                    | Fetch playlist details                 |
+| `GET`    | `/get-my-playlists`                            | Fetch user's own playlists             |
+| `GET`    | `/get-playlist-items/:playlistId`              | View notes inside a playlist           |
+| `DELETE` | `/delete-playlist/:playlistId`                 | Delete playlist                        |
+| `GET`    | `/get-user-playlists/:userName`                | Fetch a user's public playlists        |
+| `GET`    | `/get-user-playlists-with-note-status/:noteId` | Fetch owned playlists with note status |
+| `GET`    | `/is-note-present-in-playlist/:playlistId`     | Check if a note is in a playlist       |
+| `POST`   | `/:playlistId/share`                           | Share a playlist with another user     |
+| `GET`    | `/editor` / `/viewer`                          | Fetch shared playlists by role         |
+| `GET`    | `/:playlistId/members`                         | View playlist members                  |
+| `PATCH`  | `/:playlistId/members/:userId`                 | Update a member's role                 |
+| `DELETE` | `/:playlistId/members/:userId`                 | Remove a member                        |
+| `DELETE` | `/:playlistId/leave`                           | Leave a shared playlist                |
 
-Playlist owners can manage playlist details and members. Editors can add/remove and reorder notes; viewers can access shared playlists but cannot change their contents.
+> Playlist **owners** can manage playlist details and members. **Editors** can add/remove and reorder notes. **Viewers** can access shared playlists but cannot change their contents.
 
 ### 🔔 Notifications
 
-- `GET /count` - Get unread notification count
-- `GET /unread` - Fetch unread notifications
-- `GET /` - Fetch all notifications
-- `PATCH /read-all` - Mark all as read
-- `PATCH /:notificationId/read` - Mark single notification as read
-- `DELETE /:notificationId` - Remove a notification
+| Method   | Endpoint                | Description                      |
+| -------- | ----------------------- | -------------------------------- |
+| `GET`    | `/count`                | Get unread notification count    |
+| `GET`    | `/unread`               | Fetch unread notifications       |
+| `GET`    | `/`                     | Fetch all notifications          |
+| `PATCH`  | `/read-all`             | Mark all as read                 |
+| `PATCH`  | `/:notificationId/read` | Mark single notification as read |
+| `DELETE` | `/:notificationId`      | Remove a notification            |
 
-Notifications are emitted to the recipient's Socket.IO room for live delivery. Redis stores notification counters and temporary OTP values.
+> Notifications are emitted to the recipient's Socket.IO room for live delivery. Redis stores notification counters and temporary OTP values.
 
 ### ✍️ Written Notes / Blogs
 
-- `POST /` - Create a written note and queue PDF generation
-- `GET /` - Fetch the current user's written notes
-- `GET /:blogId` - Fetch a written note; non-owners receive metadata and the generated PDF URL, not editable content
-- `PATCH /:blogId` - Update a written note (owner only) and queue a new PDF when content changes
-- `DELETE /:blogId` - Delete a written note (owner only)
+| Method   | Endpoint   | Description                                                                                       |
+| -------- | ---------- | ------------------------------------------------------------------------------------------------- |
+| `POST`   | `/`        | Create a written note and queue PDF generation                                                    |
+| `GET`    | `/`        | Fetch the current user's written notes                                                            |
+| `GET`    | `/:blogId` | Fetch a written note; non-owners receive metadata and the generated PDF URL, not editable content |
+| `PATCH`  | `/:blogId` | Update a written note (owner only) and queue a new PDF when content changes                       |
+| `DELETE` | `/:blogId` | Delete a written note (owner only)                                                                |
 
-Written-note PDFs are generated asynchronously, stored in Cloudinary, and are available for viewing or download once the status is `READY`.
+> Written-note PDFs are generated asynchronously, stored in Cloudinary, and are available for viewing or download once the status is `READY`.
 
 ---
 
-**BookHub** — _Backend Repository_
+<p align="center">
+  <strong>BookHub</strong> — <em>Backend Repository</em>
+</p>
