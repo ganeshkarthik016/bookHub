@@ -26,3 +26,4 @@ dist-ssr
 bugs.txt
 
 .env
+.env.production
