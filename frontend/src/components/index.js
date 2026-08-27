@@ -30,6 +30,7 @@ export { default as FollowButton } from "./shared/FollowButton.jsx";
 export { default as LikeButton } from "./shared/LikeButton.jsx";
 export { default as CommentItem } from "./shared/CommentItem.jsx";
 export {default as CommentSection} from "./shared/CommentSection.jsx";
+export { default as PeopleModal } from "./shared/PeopleModal.jsx";
 
 // Layout
 export { default as MainLayout } from "./layout/MainLayout.jsx";

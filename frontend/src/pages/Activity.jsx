@@ -1,0 +1,17 @@
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { Heart, Loader2, MessageSquare, Users } from "lucide-react";
+import { getUserLikes } from "../services/like.service";
+import { getMyComments } from "../services/comment.service";
+import { getMyFriends } from "../services/follow.service";
+import { EmptyState, NoteCard } from "../components";
+
+export default function Activity() {
+    const [tab, setTab] = useState("likes");
+    const [data, setData] = useState({ likes: [], comments: [], friends: [] });
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+    useEffect(() => { const load = async () => { setLoading(true); setError(""); try { const [likes, comments, friends] = await Promise.all([getUserLikes({ page: 1, limit: 50 }), getMyComments(1, 50), getMyFriends(1)]); setData({ likes: likes?.notes || [], comments: comments?.comments || [], friends: friends?.friends || [] }); } catch (err) { setError(err.message || "Could not load your activity."); } finally { setLoading(false); } }; load(); }, []);
+    const tabs = [["likes", "Liked notes", Heart], ["comments", "My comments", MessageSquare], ["friends", "Friends", Users]];
+    return <div className="mx-auto max-w-5xl pb-12"><div className="mb-8"><h1 className="text-2xl font-bold text-gray-900">My activity</h1><p className="text-sm text-gray-500">Your saved notes, comments, and mutual connections.</p></div><div className="flex gap-5 border-b border-gray-200">{tabs.map(([id, label, Icon]) => <button key={id} onClick={() => setTab(id)} className={`flex items-center gap-2 border-b-2 pb-3 text-sm font-medium ${tab === id ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500"}`}><Icon className="h-4 w-4" />{label}</button>)}</div>{loading ? <div className="flex h-56 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-blue-600" /></div> : error ? <p className="mt-6 rounded-lg bg-red-50 p-4 text-sm text-red-600">{error}</p> : <div className="mt-6">{tab === "likes" && (data.likes.length ? <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{data.likes.map((note) => <NoteCard key={note._id} note={note} />)}</div> : <EmptyState title="No liked notes" description="Notes you like will appear here." />)}{tab === "comments" && (data.comments.length ? <div className="space-y-3">{data.comments.map((comment) => <Link key={comment._id} to={`/notes/${comment.note?._id}`} className="block rounded-xl border border-gray-200 bg-white p-4 shadow-sm hover:border-blue-200"><p className="text-sm text-gray-800">{comment.text}</p><p className="mt-2 text-xs text-gray-500">On: {comment.note?.title || "Deleted note"}</p></Link>)}</div> : <EmptyState title="No comments yet" description="Your comments will appear here." />)}{tab === "friends" && (data.friends.length ? <div className="grid gap-3 sm:grid-cols-2">{data.friends.map((friend) => <Link key={friend._id} to={`/profile/${friend.userName}`} className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm"><img src={friend.profilePic?.url || "https://via.placeholder.com/40"} alt="" className="h-10 w-10 rounded-full object-cover" /><span className="font-medium text-gray-900">@{friend.userName}</span></Link>)}</div> : <EmptyState title="No mutual friends" description="Follow people who follow you back to see them here." />)}</div>}</div>;
+}

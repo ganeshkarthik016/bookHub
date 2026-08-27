@@ -8,7 +8,9 @@ import Button from "../ui/Button";
 import { 
     getUserPlaylistsWithNoteStatus, 
     toggleNoteInPlaylist, 
-    createPlaylist 
+    createPlaylist,
+    getMyEditorPlaylists,
+    isNotePresentInPlaylist
 } from "../../services/playlist.service";
 
 export default function SaveToPlaylistModal({ noteId }) {
@@ -17,6 +19,8 @@ export default function SaveToPlaylistModal({ noteId }) {
     const isOpen = activeModal === "SAVE_TO_PLAYLIST";
 
     const [playlists, setPlaylists] = useState([]);
+    const [editorPlaylists, setEditorPlaylists] = useState([]);
+    const [activeTab, setActiveTab] = useState("owned");
     const [isLoading, setIsLoading] = useState(true);
     const [newPlaylistName, setNewPlaylistName] = useState("");
     const [isCreating, setIsCreating] = useState(false);
@@ -29,9 +33,17 @@ export default function SaveToPlaylistModal({ noteId }) {
             setIsLoading(true);
             setError("");
             try {
-                const data = await getUserPlaylistsWithNoteStatus(noteId);
-                if (data) setPlaylists(data);
-            } catch (err) {
+                const [owned, shared] = await Promise.all([
+                    getUserPlaylistsWithNoteStatus(noteId),
+                    getMyEditorPlaylists(),
+                ]);
+                setPlaylists(owned || []);
+                const sharedWithStatus = await Promise.all((shared || []).map(async (playlist) => ({
+                    ...playlist,
+                    isPresent: (await isNotePresentInPlaylist(playlist._id, noteId)).isPresent,
+                })));
+                setEditorPlaylists(sharedWithStatus);
+            } catch {
                 setError("Failed to fetch your playlists");
             } finally {
                 setIsLoading(false);
@@ -42,15 +54,15 @@ export default function SaveToPlaylistModal({ noteId }) {
     }, [isOpen, noteId]);
 
     const handleToggle = async (playlistId, currentIndex) => {
-        const newPlaylists = [...playlists];
-        newPlaylists[currentIndex].isPresent = !newPlaylists[currentIndex].isPresent;
-        setPlaylists(newPlaylists);
+        const setCurrentPlaylists = activeTab === "owned" ? setPlaylists : setEditorPlaylists;
+        const currentPlaylists = activeTab === "owned" ? playlists : editorPlaylists;
+        const newPlaylists = currentPlaylists.map((playlist, index) => index === currentIndex ? { ...playlist, isPresent: !playlist.isPresent } : playlist);
+        setCurrentPlaylists(newPlaylists);
 
         try {
             await toggleNoteInPlaylist(playlistId, noteId);
-        } catch (err) {
-            newPlaylists[currentIndex].isPresent = !newPlaylists[currentIndex].isPresent;
-            setPlaylists([...newPlaylists]);
+        } catch {
+            setCurrentPlaylists(currentPlaylists);
             setError("Failed to update playlist");
         }
     };
@@ -88,14 +100,17 @@ export default function SaveToPlaylistModal({ noteId }) {
             <div className="flex flex-col gap-4">
                 {error && <div className="rounded-lg bg-red-50 p-2 text-sm text-red-600">{error}</div>}
 
-                {/* The List of Playlists */}
+                <div className="flex gap-4 border-b border-gray-200">
+                    <button type="button" onClick={() => setActiveTab("owned")} className={`border-b-2 pb-2 text-sm font-medium ${activeTab === "owned" ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500"}`}>My Playlists</button>
+                    <button type="button" onClick={() => setActiveTab("shared")} className={`border-b-2 pb-2 text-sm font-medium ${activeTab === "shared" ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500"}`}>Shared</button>
+                </div>
                 <div className="max-h-60 overflow-y-auto space-y-2 pr-2">
                     {isLoading ? (
                         <div className="py-8 text-center text-gray-500">Loading your playlists...</div>
-                    ) : playlists.length === 0 ? (
-                        <p className="text-sm text-gray-500 text-center py-4">You don't have any playlists yet.</p>
+                    ) : (activeTab === "owned" ? playlists : editorPlaylists).length === 0 ? (
+                        <p className="text-sm text-gray-500 text-center py-4">{activeTab === "owned" ? "You don't have any playlists yet." : "You don't have editor access to any shared playlists."}</p>
                     ) : (
-                        playlists.map((playlist, index) => (
+                        (activeTab === "owned" ? playlists : editorPlaylists).map((playlist, index) => (
                             <button
                                 key={playlist._id}
                                 onClick={() => handleToggle(playlist._id, index)}
@@ -115,7 +130,7 @@ export default function SaveToPlaylistModal({ noteId }) {
                     )}
                 </div>
 
-                <hr className="border-gray-100 my-2" />
+                {activeTab === "owned" && <><hr className="border-gray-100 my-2" />
 
                 {/* Quick Create Form */}
                 <form onSubmit={handleCreatePlaylist} className="flex items-end gap-2">
@@ -129,7 +144,7 @@ export default function SaveToPlaylistModal({ noteId }) {
                     <Button type="submit" disabled={isCreating || !newPlaylistName.trim()} className="px-3 h-[42px]">
                         {isCreating ? <Loader2 className="h-5 w-5 animate-spin" /> : <Plus className="h-5 w-5" />}
                     </Button>
-                </form>
+                </form></>}
             </div>
         </Modal>
     );

@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { Loader2, UploadCloud } from "lucide-react";
 import { registerUser, loginUser } from "../services/auth.service";
+import { sendEmailVerificationOtp } from "../services/user.service";
 import { loginSuccess } from "../store/slices/authSlice";
 import { Input, Button } from "../components";
 
@@ -61,7 +62,8 @@ export default function Signup() {
 
             if (loginData) {
                 dispatch(loginSuccess(loginData));
-                navigate("/"); // Push to home feed
+                await sendEmailVerificationOtp();
+                navigate("/verify-email");
             }
 
         } catch (err) {
