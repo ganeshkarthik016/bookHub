@@ -5,8 +5,10 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon src/index.js",
+    "start": "node src/index.js",
     "worker": "node src/workers/blogPdf.worker.js",
-    "start": "node src/index.js"
+    "lint": "eslint src",
+    "check": "node --check src/index.js"
   },
   "keywords": [],
   "author": "",
