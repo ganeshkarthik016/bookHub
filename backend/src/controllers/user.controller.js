@@ -137,7 +137,8 @@ const user = await User.findOne({
     )
     const options = {
         httpOnly: true,
-        secure: true
+        secure: true,
+        sameSite: "none"
     }
     return res.status(200)
         .cookie("refreshToken", refreshToken, options)
@@ -159,7 +160,8 @@ const logoutUser = asyncHandler(async (req, res) => {
     await User.findByIdAndUpdate(req.user._id, { $set: { refreshToken: "" } }, { new: true });
     const options = {
         httpOnly: true,
-        secure: true
+        secure: true,
+        sameSite: "none"
     }
     console.log(req.user.userName);
     return res.status(200)
@@ -194,7 +196,8 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
         }
         const options = {
             httpOnly: true,
-            secure: true
+            secure: true,
+            sameSite: "none"
         }
         const new_accessToken = await user.generateAccessToken();
         const new_refreshToken = await user.generateRefreshToken();
@@ -250,7 +253,8 @@ const changePassword = asyncHandler(async (req, res) => {
     await user.save({ validateBeforeSave: false });
     const options = {
         httpOnly: true,
-        secure: true
+        secure: true,
+        sameSite: "none"
     }
 
 
@@ -656,6 +660,7 @@ const deleteUser = asyncHandler(async (req, res) => {
     const options = {
         httpOnly: true,
         secure: true,
+        sameSite: "none"
     };
 
     return res.status(200)
