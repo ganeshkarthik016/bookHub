@@ -73,6 +73,20 @@ jobs:
       - name: Start Docker services
         run: docker compose up -d --build
 
+      - name: Wait for backend
+        run: |
+          for i in {1..30}; do
+            if curl -fsS http://localhost:8000/health > /dev/null; then
+              echo "Backend is ready"
+              exit 0
+            fi
+            echo "Waiting for backend..."
+            sleep 2
+          done
+          echo "Backend failed to start"
+          docker compose logs
+          exit 1
+
       - name: Run tests
         working-directory: backend
         env:
@@ -82,3 +96,11 @@ jobs:
       - name: Stop Docker services
         if: always()
         run: docker compose down -v
+
+  deploy:
+    needs: [frontend, backend]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render deploy
+        run: curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
