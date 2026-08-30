@@ -21,7 +21,7 @@ export default function CommentSection({ noteId, currentUserId }) {
                     setComments(data.comments);
                     setHasMore(data.hasMore);
                 }
-            } catch (error) {
+            } catch {
                 console.error("Failed to load comments");
             } finally {
                 setIsLoading(false);
@@ -42,7 +42,7 @@ export default function CommentSection({ noteId, currentUserId }) {
                 setComments([{...response, user: { _id: currentUserId, userName: "You" }}, ...comments]);
                 setNewComment("");
             }
-        } catch (error) {
+        } catch {
             console.error("Failed to post comment");
         } finally {
             setIsPosting(false);
@@ -53,7 +53,7 @@ export default function CommentSection({ noteId, currentUserId }) {
         try {
             await deleteMyComment(commentId);
             setComments(comments.filter(c => c._id !== commentId));
-        } catch (error) {
+        } catch {
             console.error("Failed to delete");
         }
     };
@@ -63,7 +63,7 @@ export default function CommentSection({ noteId, currentUserId }) {
             // FIX: Passed newText as a string instead of { text: newText }
             const updated = await editMyComment(commentId, newText);
             setComments(comments.map(c => c._id === commentId ? updated : c));
-        } catch (error) {
+        } catch {
             console.error("Failed to edit");
         }
     };
@@ -77,7 +77,7 @@ export default function CommentSection({ noteId, currentUserId }) {
                 setPage(nextPage);
                 setHasMore(data.hasMore);
             }
-        } catch (error) {
+        } catch {
             console.error("Failed to load more comments");
         }
     };

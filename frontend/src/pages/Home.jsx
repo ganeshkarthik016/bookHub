@@ -26,7 +26,7 @@ export default function Home() {
                     setHasMore(data.hasMore);
                     setPage(1);
                 }
-            } catch (err) {
+            } catch {
                 setError("Failed to load the feed. Please try again.");
             } finally {
                 setIsLoading(false);
@@ -45,7 +45,7 @@ export default function Home() {
                 setHasMore(data.hasMore);
                 setPage(nextPage);
             }
-        } catch (err) {
+        } catch {
             console.error("Failed to load more notes");
         }
     };

@@ -20,7 +20,7 @@ export default function FollowButton({ userId, initialIsFollowing = false, class
             try {
                 const response = await checkFollowStatus(userId);
                 setIsFollowing(response.isFollowing); 
-            } catch (error) {
+            } catch {
                 console.error("Failed to check follow status");
             } finally {
                 setIsChecking(false);
@@ -39,7 +39,7 @@ export default function FollowButton({ userId, initialIsFollowing = false, class
         
         try {
             await toggleFollow(userId);
-        } catch (error) {
+        } catch {
             setIsFollowing(isFollowing); 
             console.error("Failed to toggle follow");
         } finally {

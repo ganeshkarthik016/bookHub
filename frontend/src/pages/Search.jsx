@@ -32,7 +32,7 @@ export default function Search() {
 
                 if (notesData?.notes) setNotes(notesData.notes);
                 if (usersData) setUsers(usersData);
-            } catch (err) {
+            } catch {
                 setError("Failed to fetch search results.");
             } finally {
                 setIsLoading(false);

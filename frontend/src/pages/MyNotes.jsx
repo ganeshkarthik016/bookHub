@@ -19,7 +19,7 @@ export default function MyNotes() {
                 if (data?.notes) {
                     setNotes(data.notes);
                 }
-            } catch (err) {
+            } catch {
                 setError("Failed to load your notes.");
             } finally {
                 setIsLoading(false);
