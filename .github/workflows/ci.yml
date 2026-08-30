@@ -1,0 +1,119 @@
+name: BookHub CI
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+  backend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Create backend environment
+        working-directory: backend
+        run: |
+          echo "ACCESS_TOKEN_SECRET=${{ secrets.ACCESS_TOKEN_SECRET }}" >> .env
+          echo "REFRESH_TOKEN_SECRET=${{ secrets.REFRESH_TOKEN_SECRET }}" >> .env
+          echo "CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}" >> .env
+          echo "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" >> .env
+          echo "CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}" >> .env
+          echo "EMAIL_USERNAME=${{ secrets.EMAIL_USERNAME }}" >> .env
+          echo "EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }}" >> .env
+
+      - name: Check syntax
+        working-directory: backend
+        run: npm run check
+
+      - name: Start Docker services
+        run: docker compose up -d --build
+
+      - name: Wait for backend
+        run: |
+          for i in {1..30}; do
+            if curl -fsS http://localhost:8000/health > /dev/null; then
+              echo "Backend is ready"
+              exit 0
+            fi
+            echo "Waiting for backend..."
+            sleep 2
+          done
+          echo "Backend failed to start"
+          docker compose logs
+          exit 1
+
+      - name: Seed CI test user
+        run: |
+          curl -sf -X POST http://localhost:8000/api/v1/users/register \
+            -H "Content-Type: application/json" \
+            -d '{
+              "userFullName": "CI Test User",
+              "email": "${{ secrets.TEST_IDENTIFIER }}",
+              "userName": "ci_test_user",
+              "password": "${{ secrets.TEST_PASSWORD }}"
+            }' || echo "Test user may already exist, continuing"
+
+      - name: Run tests
+        working-directory: backend
+        env:
+          BASE_URL: http://localhost:8000
+          TEST_IDENTIFIER: ${{ secrets.TEST_IDENTIFIER }}
+          TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
+        run: npm test
+
+      - name: Stop Docker services
+        if: always()
+        run: docker compose down -v
+
+  deploy:
+    needs: [frontend, backend]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render deploy
+        run: curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"

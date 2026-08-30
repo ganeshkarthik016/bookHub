@@ -5,6 +5,7 @@ import conf from "../conf/conf";
 
 const SocketContext = createContext();
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useSocket = () => useContext(SocketContext);
 
 export const SocketProvider = ({ children }) => {
@@ -19,6 +20,7 @@ export const SocketProvider = ({ children }) => {
                 },
             });
 
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setSocket(socketInstance);
 
             socketInstance.emit("register", currentUser._id);

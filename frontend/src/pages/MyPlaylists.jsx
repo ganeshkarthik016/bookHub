@@ -36,7 +36,7 @@ export default function MyPlaylists() {
                 if (ownedData) setOwnedPlaylists(ownedData);
                 if (editorData) setEditorPlaylists(editorData);
                 if (viewerData) setViewerPlaylists(viewerData);
-            } catch (err) {
+            } catch {
                 setError("Failed to load your playlists.");
             } finally {
                 setIsLoading(false);

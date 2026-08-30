@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "nodemon src/index.js",
     "worker": "node src/workers/blogPdf.worker.js",
-    "start": "node src/index.js"
+    "start": "concurrently --restart-tries 3 \"node src/index.js\" \"node src/workers/blogPdf.worker.js\"",
+    "check": "find src -name '*.js' -print0 | xargs -0 -n1 node --check",
+    "test": "node --test tests"
   },
   "keywords": [],
   "author": "",
@@ -15,9 +17,9 @@
   "dependencies": {
     "bcrypt": "^6.0.0",
     "bullmq": "^6.3.1",
-    "ioredis": "^5.3.2",
     "cloudinary": "^2.10.0",
     "compression": "^1.8.1",
+    "concurrently": "^10.0.5",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "crypto": "^1.0.1",
@@ -25,6 +27,7 @@
     "express": "^5.2.1",
     "express-rate-limit": "^8.6.1",
     "helmet": "^8.3.0",
+    "ioredis": "^5.3.2",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.7.4",
     "morgan": "^1.11.0",

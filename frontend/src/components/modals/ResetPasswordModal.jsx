@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Loader2, KeyRound, Mail, ArrowRight } from "lucide-react";
+import { Loader2, KeyRound, Mail } from "lucide-react";
 import { closeModal } from "../../store/slices/uiSlice";
 import { forgetPasswordGenerateOtp, verifyResetPasswordOtp } from "../../services/user.service";
 import Modal from "../ui/Modal";

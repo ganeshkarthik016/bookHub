@@ -18,7 +18,7 @@ export default function ManageMembersModal({ isOpen, onClose, playlistId }) {
             try {
                 const data = await getPlaylistMembers(playlistId); 
                 setMembers(data);
-            } catch (err) {
+            } catch {
                 setError("Failed to load members.");
             } finally {
                 setIsLoading(false);
@@ -31,7 +31,7 @@ export default function ManageMembersModal({ isOpen, onClose, playlistId }) {
     const handleRoleChange = async (userId, newRole) => {
         setActionLoading(userId);
         try {
-            await updateMemberRole(playlistId, userId, newRole); // UNCOMMENTED
+            await updateMemberRole(playlistId, userId, newRole); 
             setMembers((prev) => prev.map((m) => m.user._id === userId ? { ...m, role: newRole } : m));
         } catch (err) {
             setError(err.message || "Failed to update role");

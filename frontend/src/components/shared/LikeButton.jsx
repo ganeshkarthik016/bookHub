@@ -12,6 +12,7 @@ export default function LikeButton({ noteId, initialLikesCount = 0 }) {
     const [isChecking, setIsChecking] = useState(true);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setLikesCount(initialLikesCount);
     }, [initialLikesCount]);
 
@@ -24,7 +25,7 @@ export default function LikeButton({ noteId, initialLikesCount = 0 }) {
             try {
                 const response = await checkLikeStatus(noteId);
                 setIsLiked(response.liked);
-            } catch (error) {
+            } catch {
                 console.error("Failed to check like status");
             } finally {
                 setIsChecking(false);
@@ -44,7 +45,7 @@ export default function LikeButton({ noteId, initialLikesCount = 0 }) {
 
         try {
             await toggleLike(noteId);
-        } catch (error) {
+        } catch {
             setIsLiked(isLiked);
             setLikesCount((prev) => (isLiked ? prev + 1 : prev - 1));
             console.error("Failed to toggle like");

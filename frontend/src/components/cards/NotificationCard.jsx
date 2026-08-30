@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import { Heart, MessageCircle, UserPlus, ListMusic, Info } from "lucide-react";
 
 export default function NotificationCard({ notification, onMarkAsRead, onDelete }) {
