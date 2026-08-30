@@ -4,7 +4,7 @@ import { CheckCheck, Loader2, Bell } from "lucide-react";
 import { useSocket } from "../context/SocketContext";
 import { getNotifications, markNotificationAsRead, markAllNotificationsAsRead, deleteNotification } from "../services/notification.service";
 import { markNotificationRead, markAllNotificationsRead, removeNotification, addNotification } from "../store/slices/notificationSlice";
-import { NotificationCard, EmptyState, Button } from "../components";
+import { NotificationCard, EmptyState } from "../components";
 
 export default function Inbox() {
     const dispatch = useDispatch();
@@ -39,7 +39,7 @@ export default function Inbox() {
                     setLocalNotifications(data);
                     setHasMore(data.length === 20); 
                 }
-            } catch (error) {
+            } catch {
                 console.error("Failed to load inbox");
             } finally {
                 setIsLoading(false);
@@ -55,7 +55,7 @@ export default function Inbox() {
         dispatch(markNotificationRead(id)); // Keep header dropdown in sync
         try {
             await markNotificationAsRead(id);
-        } catch (error) {
+        } catch {
             console.error("Error marking read");
         }
     };
@@ -65,7 +65,7 @@ export default function Inbox() {
         dispatch(markAllNotificationsRead());
         try {
             await markAllNotificationsAsRead();
-        } catch (error) {
+        } catch {
             console.error("Error marking all read");
         }
     };
@@ -75,7 +75,7 @@ export default function Inbox() {
         dispatch(removeNotification(id));
         try {
             await deleteNotification(id);
-        } catch (error) {
+        } catch {
             console.error("Error deleting notification");
         }
     };
@@ -89,7 +89,7 @@ export default function Inbox() {
                 setPage(nextPage);
                 setHasMore(data.length === 20);
             }
-        } catch (error) {
+        } catch {
             console.error("Error loading more");
         }
     };

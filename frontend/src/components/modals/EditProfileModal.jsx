@@ -24,6 +24,7 @@ export default function EditProfileModal({ currentUser }) {
 
     useEffect(() => {
         if (currentUser && isOpen) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setUserFullName(currentUser.userFullName || "");
             setBio(currentUser.bio || "");
             setPreviewUrl(currentUser.profilePic?.url || "https://via.placeholder.com/100");
