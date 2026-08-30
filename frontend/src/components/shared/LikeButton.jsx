@@ -25,7 +25,7 @@ export default function LikeButton({ noteId, initialLikesCount = 0 }) {
             try {
                 const response = await checkLikeStatus(noteId);
                 setIsLiked(response.liked);
-            } catch (error) {
+            } catch {
                 console.error("Failed to check like status");
             } finally {
                 setIsChecking(false);
