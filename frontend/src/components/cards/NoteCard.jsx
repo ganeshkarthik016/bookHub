@@ -1,4 +1,4 @@
-import { Heart, Eye, Download, FileText } from "lucide-react";
+import { Heart, Eye, Download } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function NoteCard({ note }) {
