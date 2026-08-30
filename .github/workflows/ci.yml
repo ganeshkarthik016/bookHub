@@ -87,10 +87,23 @@ jobs:
           docker compose logs
           exit 1
 
+      - name: Seed CI test user
+        run: |
+          curl -sf -X POST http://localhost:8000/api/v1/users/register \
+            -H "Content-Type: application/json" \
+            -d '{
+              "userFullName": "CI Test User",
+              "email": "${{ secrets.TEST_IDENTIFIER }}",
+              "userName": "ci_test_user",
+              "password": "${{ secrets.TEST_PASSWORD }}"
+            }' || echo "Test user may already exist, continuing"
+
       - name: Run tests
         working-directory: backend
         env:
           BASE_URL: http://localhost:8000
+          TEST_IDENTIFIER: ${{ secrets.TEST_IDENTIFIER }}
+          TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
         run: npm test
 
       - name: Stop Docker services
