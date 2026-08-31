@@ -21,7 +21,7 @@ The React client for **BookHub**, built with Vite for a fast dev experience. It 
 
 | Category           | Technology          |
 | ------------------ | ------------------- |
-| Core               | React 18, Vite      |
+| Core               | React 19, Vite      |
 | Routing            | React Router DOM    |
 | State Management   | Redux Toolkit (RTK) |
 | Styling            | Tailwind CSS        |
@@ -83,7 +83,7 @@ frontend/
 
 ### Prerequisites
 
-- **Node.js** v16 or higher
+- **Node.js** v20 or higher
 - The [BookHub backend](../backend/README.md) running locally or accessible remotely
 
 ### 1. Installation
@@ -148,6 +148,12 @@ Serves the `dist/` folder locally so you can sanity-check the production build b
 | `npm run build`   | Build the app for production         |
 | `npm run preview` | Preview the production build locally |
 | `npm run lint`    | Run ESLint across the project        |
+
+---
+
+## 🔄 CI/CD & Deployment
+
+Every push and pull request to `main` runs `npm run lint` and `npm run build` via GitHub Actions — see [CI/CD](../README.md#-cicd) in the root README. The live app is deployed on **Vercel**, which auto-deploys on push to `main` through its own Git integration, independent of the GitHub Actions workflow.
 
 ---
 

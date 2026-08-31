@@ -51,18 +51,23 @@ backend/
 │   ├── db/                 # Database connection setup (MongoDB)
 │   ├── middlewares/        # Custom middlewares (auth, rate limits, multer, etc.)
 │   ├── models/             # Mongoose schemas and models
+│   ├── queues/             # BullMQ queue definitions
 │   ├── routes/             # Express route definitions
 │   ├── utils/              # Helper functions, custom error/response classes
+│   ├── workers/            # BullMQ background workers (written-note PDF generation)
 │   ├── app.js              # Express app setup and middleware configuration
 │   ├── constants.js        # Global constants (DB names, etc.)
 │   └── index.js            # Main entry point, server & Socket.IO initialization
+├── tests/                  # Backend integration test suite (node:test)
+│   ├── routes/             # Per-resource route tests
+│   └── test-utils.js       # Shared test helpers
 ├── .dockerignore           # Files to ignore in Docker builds
 ├── .env                    # Environment variables (do not commit this!)
 ├── .env.example            # Template for environment variables
 ├── .gitignore              # Files to ignore in Git
 ├── .prettierignore         # Files to ignore for Prettier
 ├── .prettierrc             # Prettier formatting rules
-├── Dockerfile              # Docker configuration for containerization
+├── Dockerfile.backend      # Docker configuration for containerization
 ├── package-lock.json       # Exact dependency versions
 └── package.json            # Project dependencies and scripts
 ```
@@ -75,7 +80,7 @@ backend/
 
 Make sure you have the following installed:
 
-- **Node.js** v16 or higher
+- **Node.js** v20 or higher (the Docker image uses Node 22)
 - **MongoDB** (local instance or MongoDB Atlas)
 - **Redis** (local instance or cloud Redis)
 - **Docker** (optional, for containerized setup)
@@ -126,10 +131,26 @@ The worker generates PDFs for written notes, uploads them to Cloudinary, and upd
 From the repository root, where `docker-compose.yml` lives:
 
 ```bash
-docker-compose up -d --build
+docker compose up -d --build
 ```
 
 This spins up the API server, the worker, and the required databases together. See the [root README](../README.md#-quick-start-docker) for details.
+
+### 6. Running Tests
+
+With the API running (locally or via Docker), run the integration test suite:
+
+```bash
+BASE_URL=http://localhost:8000 npm test
+```
+
+Check for syntax errors across all source files:
+
+```bash
+npm run check
+```
+
+Both scripts are run automatically in CI on every push and pull request — see [CI/CD](../README.md#-cicd) in the root README.
 
 ---
 

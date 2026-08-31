@@ -3,6 +3,7 @@
 **BookHub** is a full-stack study and knowledge-sharing platform where students can create, upload, organize, discover, and interact with study material — combining note sharing, social features, playlists, search, and real-time notifications into a single platform.
 
 [![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://book-hub-ashy-six.vercel.app)
+[![CI](https://github.com/ganeshkarthik016/bookHub/actions/workflows/ci.yml/badge.svg)](https://github.com/ganeshkarthik016/bookHub/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 [Live Demo](https://book-hub-ashy-six.vercel.app) · [Report a Bug](https://github.com/ganeshkarthik016/bookHub/issues) · [Request a Feature](https://github.com/ganeshkarthik016/bookHub/issues)
@@ -17,6 +18,7 @@
 - [Architecture](#️-architecture)
 - [Project Structure](#-project-structure)
 - [Quick Start](#-quick-start-docker)
+- [CI/CD](#-cicd)
 - [Goal](#-goal)
 - [License](#-license)
 
@@ -77,7 +79,7 @@ BookHub is deployed using managed cloud services in production.
 **Authentication & Account**
 
 - 🔐 Registration, login, logout, and JWT access/refresh-token sessions
-- 📧 Gmail verification, password reset, and email changes via OTP (Nodemailer)
+- 📧 Email verification, password reset, and email changes via OTP (Brevo Email API)
 - 👤 Profile, account details, profile picture, and account deletion management
 - 🔄 Automatic access-token refresh
 - 🛡️ Protected and public routes
@@ -188,11 +190,25 @@ Since this project includes a `docker-compose.yml` file, you can spin up the bac
 3. **Start the application**
 
    ```bash
-   docker-compose up -d --build
+   docker compose up -d --build
    ```
 
 4. **Open the app**
    Once the containers are running, visit the frontend at `http://localhost:<port>` (see `frontend/README.md` for the configured port).
+
+---
+
+## 🔄 CI/CD
+
+BookHub uses **GitHub Actions** for continuous integration and deployment. On every push and pull request to `main`, the pipeline:
+
+- **Frontend job** — installs dependencies, runs ESLint, and builds the Vite app.
+- **Backend job** — spins up the full stack via Docker Compose (API, worker, MongoDB, Redis), runs a health check, seeds a test account, and runs the backend test suite (`node --test`).
+- **Deploy job** — runs only on successful pushes to `main`, triggering an automatic deploy to Render (backend) via a deploy hook.
+
+The frontend on Vercel deploys automatically on push to `main` through Vercel's own Git integration, independent of this workflow.
+
+See [`.github/workflows/ci.yml`](.github/workflows/ci.yml) for the full pipeline definition.
 
 ---
 
