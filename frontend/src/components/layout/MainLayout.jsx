@@ -5,7 +5,7 @@ import RightSidebar from "./sidebar/RightSidebar.jsx";
 
 export default function MainLayout() {
     return (
-        <div className="flex h-screen flex-col bg-gray-50 overflow-hidden">
+        <div className="flex h-dvh flex-col bg-gray-50 overflow-hidden">
             
             <Header />
 
